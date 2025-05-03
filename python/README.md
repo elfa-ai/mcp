@@ -96,3 +96,62 @@ ELFA_API_KEY=your-api-key-here elfa-mcp
 - `search_keyword_mentions` - Search for mentions containing specific keywords
 - `get_trending_tokens` - Find trending tokens by mention count
 - `get_account_stats` - Analyze Twitter account engagement metrics
+
+## Development
+
+### Setup
+
+1. Clone the repository
+2. Navigate to the python directory
+3. Create a virtual environment: `python -m venv venv`
+4. Activate the environment: `source venv/bin/activate` (Linux/Mac) or `venv\Scripts\activate` (Windows)
+5. Install dev requirements: `pip install -r requirements-dev.txt`
+
+### Testing
+
+Run the tests using pytest:
+
+```bash
+pytest
+```
+
+With coverage:
+
+```bash
+pytest --cov=elfa_mcp
+```
+
+## Releasing a New Version
+
+To release a new version to PyPI:
+
+1. Update the version in both:
+   - `pyproject.toml`
+   - `src/elfa_mcp/__init__.py`
+
+2. Commit the changes:
+   ```bash
+   git add pyproject.toml src/elfa_mcp/__init__.py
+   git commit -m "Bump version to X.Y.Z"
+   ```
+
+3. Create and push a tag:
+   ```bash
+   git tag v1.0.0  # Use appropriate version number
+   git push origin v1.0.0
+   ```
+
+4. Create a GitHub Release:
+   - Go to the repository on GitHub
+   - Navigate to "Releases"
+   - Click "Create a new release"
+   - Select the tag you just pushed
+   - Add release notes
+   - Click "Publish release"
+   
+5. The GitHub Actions workflow will automatically:
+   - Build the package
+   - Publish to TestPyPI first for verification
+   - Then publish to PyPI
+
+This two-step process (TestPyPI followed by PyPI) provides an additional safety check before the official publication.

@@ -1,6 +1,6 @@
 # Elfa MCP
 
-A multi-language project implementing MCP (More details needed about what MCP represents).
+A multi-language project implementing MCP (Model Context Protocol) server for accessing Elfa's crypto and social media analytics.
 
 ## Project Structure
 
@@ -16,12 +16,15 @@ This repository contains both Python and TypeScript implementations:
 
 The Python implementation is located in the `/python` directory. For detailed setup instructions, see [python/README.md](python/README.md).
 
-#### Prerequisites
-
-- Python (version from pyproject.toml)
-- Docker (optional, for containerized environment)
-
 #### Installation
+
+You can install the Python package directly from PyPI:
+
+```sh
+pip install elfa-mcp
+```
+
+Or install from the repository:
 
 1. Navigate to the Python directory:
 
@@ -40,6 +43,12 @@ pip install -r requirements.txt
 ```sh
 pip install -r requirements-dev.txt
 ```
+
+#### Prerequisites
+
+- Python 3.10 or higher
+- Docker (optional, for containerized environment)
+- An Elfa API key (get one at [elfa.ai](https://elfa.ai))
 
 ### TypeScript Implementation
 
