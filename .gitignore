@@ -1,11 +1,8 @@
-__pycache__
-.pytest_cache
-venv
-.vscode
-
-# Coverage files
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
+node_modules/
+dist/
+coverage/
+*.log
+.env
+.env.*
+.DS_Store
+.mcp.json

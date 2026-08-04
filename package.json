@@ -1,0 +1,73 @@
+{
+  "name": "@elfa-ai/mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol server for the Elfa API - crypto social intelligence and the Auto condition engine",
+  "license": "MIT",
+  "author": "Elfa Team",
+  "type": "module",
+  "mcpName": "ai.elfa/mcp",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "elfa-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "manifest.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:drift": "tsx scripts/check-drift.ts",
+    "update:schema": "curl -fsSL -o swagger.json https://docs.elfa.ai/swagger/swagger.json",
+    "docs:tools": "tsx scripts/gen-tool-table.ts",
+    "docs:check": "tsx scripts/gen-tool-table.ts --check",
+    "verify": "npm run typecheck && npm run test && npm run check:drift && npm run docs:check",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "elfa",
+    "mcp",
+    "model-context-protocol",
+    "crypto",
+    "social-intelligence",
+    "trading",
+    "agent"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elfa-ai/mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elfa-ai/mcp/issues"
+  },
+  "homepage": "https://docs.elfa.ai",
+  "dependencies": {
+    "@elfa-ai/sdk": "^3.0.1",
+    "@modelcontextprotocol/sdk": "^1.20.0",
+    "express": "^5.1.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.0.0"
+  }
+}
