@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "ai.elfa/mcp",
+  "description": "Crypto social intelligence from X and Telegram, plus the Elfa Auto condition engine",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/elfa-ai/mcp",
+    "source": "github"
+  },
+  "websiteUrl": "https://docs.elfa.ai",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@elfa-ai/mcp",
+      "version": "1.0.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "ELFA_API_KEY",
+          "description": "Elfa API key from https://dev.elfa.ai",
+          "isRequired": true,
+          "isSecret": true
+        },
+        {
+          "name": "ELFA_HMAC_SECRET",
+          "description": "Signs Auto requests that link an exchange or place an order",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

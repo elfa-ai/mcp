@@ -1,0 +1,154 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., 1.0.1)"
+        required: true
+        type: string
+
+jobs:
+  validate:
+    name: Validate Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full test suite
+        run: |
+          npm run verify
+          npm run build
+
+      - name: Validate version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          EXPECTED="${INPUT_VERSION:-${TAG_NAME#v}}"
+          if [ "$PACKAGE_VERSION" != "$EXPECTED" ]; then
+            echo "Version mismatch: package.json has $PACKAGE_VERSION, release asks for $EXPECTED"
+            exit 1
+          fi
+          echo "Version validation passed for $PACKAGE_VERSION"
+
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    needs: validate
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false
+
+      - name: Upgrade npm for trusted publishing
+        run: |
+          npm install -g npm@latest
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Publish to NPM
+        run: npm publish --access public
+
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate, publish]
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get package info
+        id: package
+        run: |
+          echo "name=$(node -p "require('./package.json').name")" >> $GITHUB_OUTPUT
+          echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+        run: |
+          set -euo pipefail
+
+          awk -v ver="$VERSION" '
+            BEGIN { gsub(/\./, "\\.", ver) }
+            $0 ~ "^## +" ver "([[:space:]]|$)" { capture = 1; next }
+            capture && /^## / { exit }
+            capture { print }
+          ' CHANGELOG.md > section.md || true
+
+          sed -i -e '/./,$!d' section.md
+          sed -i -e :a -e '/^\n*$/{$d;N;ba' -e '}' section.md
+
+          if [ -s section.md ]; then
+            { echo "## Changes"; echo ""; cat section.md; } > RELEASE_NOTES.md
+          else
+            PREV_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+            echo "## Changes" > RELEASE_NOTES.md
+            if [ -n "$PREV_TAG" ]; then
+              echo "" >> RELEASE_NOTES.md
+              git log "$PREV_TAG"..HEAD --pretty=format:"- %s (%h)" --no-merges >> RELEASE_NOTES.md
+              echo "" >> RELEASE_NOTES.md
+            else
+              echo "- Initial release" >> RELEASE_NOTES.md
+            fi
+          fi
+
+          {
+            echo ""
+            echo "## Installation"
+            echo ""
+            echo '```bash'
+            echo "npx -y ${PACKAGE_NAME}@${VERSION}"
+            echo '```'
+          } >> RELEASE_NOTES.md
+
+          cat RELEASE_NOTES.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.package.outputs.version }}
+          name: Release v${{ steps.package.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: ${{ contains(steps.package.outputs.version, '-') }}

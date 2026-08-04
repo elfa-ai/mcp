@@ -1,81 +1,110 @@
-# Installation Guide
+# Installation
 
-This guide will help you install and set up the Elfa MCP server on your system.
+## Requirements
 
-## Prerequisites
+- Node.js 20 or newer
+- An Elfa API key from [dev.elfa.ai](https://dev.elfa.ai)
 
-Before installing the Elfa MCP server, ensure you have:
+There is nothing to install ahead of time. `npx` fetches the server the first time a client starts it.
 
-1. **Python 3.10 or higher** installed on your system
-2. **An Elfa API key** - Get one from [dev.elfa.ai](https://elfa.ai)
-3. **Claude Desktop** (or another MCP client) installed
-
-## Installation Methods
-
-### Method 1: Install from PyPI (Recommended)
-
-The simplest way to install is using pip:
+## Claude Code
 
 ```bash
-pip install elfa-mcp
+claude mcp add elfa --env ELFA_API_KEY=your-key -- npx -y @elfa-ai/mcp
 ```
 
-### Method 2: Install from Source
+## Claude Desktop
 
-For the latest development version:
+Edit the config file:
 
-```bash
-git clone https://github.com/elfa-ai/elfa-mcp.git
-cd elfa-mcp/python
-pip install -e .
-```
-
-## Configuration
-
-### Setting up with Claude Desktop
-
-1. Create or edit your Claude Desktop configuration file:
-   * macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   * Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-
-2. Add the Elfa MCP server configuration:
+- macOS `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "elfa": {
-      "command": "python",
-      "args": ["-m", "elfa_mcp.server"],
+      "command": "npx",
+      "args": ["-y", "@elfa-ai/mcp"],
       "env": {
-        "ELFA_API_KEY": "your-api-key-here"
+        "ELFA_API_KEY": "your-key"
       }
     }
   }
 }
 ```
 
-3. Restart Claude Desktop
+Restart Claude Desktop afterwards.
 
-## Verifying Installation
+## Cursor
 
-1. Open Claude Desktop
-2. Look for the hammer icon in the bottom right of the input box
-3. Click it to see the available tools from the Elfa MCP server
-4. Try a query like "What are the trending tokens in the last 24 hours?"
+`~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` for one. Same JSON as Claude Desktop.
+
+## VS Code
+
+`.vscode/mcp.json` in the workspace, or the user config via `MCP: Open User Configuration`. VS Code uses `servers` rather than `mcpServers`:
+
+```json
+{
+  "servers": {
+    "elfa": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@elfa-ai/mcp"],
+      "env": {
+        "ELFA_API_KEY": "your-key"
+      }
+    }
+  }
+}
+```
+
+## Codex
+
+```bash
+codex mcp add elfa -- npx -y @elfa-ai/mcp
+```
+
+Set `ELFA_API_KEY` in the environment Codex runs in.
+
+## Auto trading actions
+
+Auto can place orders on a connected exchange when a query fires. That path needs `ELFA_HMAC_SECRET`, issued alongside the API key, and an exchange connection.
+
+Binance and Pacifica connect with `elfa_auto_exchanges`. Hyperliquid and GMX use a wallet set up in the Elfa app.
+
+Everything else, including notification, webhook, Telegram and LLM actions, works with just the API key.
+
+## Remote server
+
+For a hosted deployment, run the same package over Streamable HTTP:
+
+```bash
+ELFA_MCP_TRANSPORT=http \
+ELFA_MCP_PORT=3000 \
+ELFA_MCP_ALLOWED_ORIGINS=https://your-client.example \
+npx -y @elfa-ai/mcp
+```
+
+The endpoint is `POST /mcp`. It is stateless, so it scales horizontally without sticky sessions. Clients send `x-elfa-api-key`, and `x-elfa-hmac-secret` when they need Auto trading actions. `GET /healthz` is a liveness probe.
+
+Put it behind TLS and set `ELFA_MCP_ALLOWED_ORIGINS` before exposing it.
+
+## Verifying
+
+Ask the client *"what's trending in crypto right now?"*. It should call `elfa_trending`.
+
+If a call fails, `elfa_status` reports whether the key is valid and how many credits remain.
 
 ## Troubleshooting
 
-### Common Issues
+| Symptom | Cause |
+| --- | --- |
+| Server does not appear | Node is older than 20, or the client was not restarted |
+| Authentication failed | `ELFA_API_KEY` is missing, wrong, or expired |
+| Out of credits | The plan's monthly credits are used up |
+| Action requires request signing | `ELFA_HMAC_SECRET` is not set, and the request links an exchange or places an order |
+| Forbidden on an Auto trading call | Auto has not been enabled for the account in the developer portal |
+| Timestamp too far from server time | The machine's clock has drifted. Signed requests are rejected beyond 30 seconds |
 
-1. **API Key Invalid**: Ensure your API key is correct and has not expired
-2. **Server Not Found**: Check that the path to the server module is correct
-3. **Connection Issues**: Verify Claude Desktop is correctly configured
-
-### Getting Logs
-
-To debug issues, you can check the MCP logs:
-
-* macOS: `~/Library/Logs/Claude/mcp*.log`
-* Windows: `%APPDATA%\Claude\logs\mcp*.log`
-
-For additional help, check the GitHub repository or open an issue.
+Claude Desktop logs are in `~/Library/Logs/Claude/mcp*.log` on macOS and `%APPDATA%\Claude\logs\mcp*.log` on Windows.
