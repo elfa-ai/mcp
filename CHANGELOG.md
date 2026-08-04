@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0
+## 1.0.1
 
 First release of the TypeScript server, published as `@elfa-ai/mcp`.
 

@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": "/v2"
@@ -18,7 +18,10 @@
         "idempotentHint": true,
         "openWorldHint": false
       },
-      "operations": ["ping-v2", "getApiKeyStatus-v2"]
+      "operations": [
+        "ping-v2",
+        "getApiKeyStatus-v2"
+      ]
     },
     {
       "name": "elfa_mentions",
@@ -65,7 +68,10 @@
         "idempotentHint": true,
         "openWorldHint": false
       },
-      "operations": ["getTrendingNarratives-v2", "getEventSummary-v2"]
+      "operations": [
+        "getTrendingNarratives-v2",
+        "getEventSummary-v2"
+      ]
     },
     {
       "name": "elfa_account_stats",
@@ -78,7 +84,9 @@
         "idempotentHint": true,
         "openWorldHint": false
       },
-      "operations": ["getAccountSmartStats-v2"]
+      "operations": [
+        "getAccountSmartStats-v2"
+      ]
     },
     {
       "name": "elfa_chat",
@@ -91,7 +99,9 @@
         "idempotentHint": false,
         "openWorldHint": false
       },
-      "operations": ["chat-v2"]
+      "operations": [
+        "chat-v2"
+      ]
     },
     {
       "name": "elfa_auto_build",
@@ -104,7 +114,9 @@
         "idempotentHint": false,
         "openWorldHint": false
       },
-      "operations": ["auto-chat-v2"]
+      "operations": [
+        "auto-chat-v2"
+      ]
     },
     {
       "name": "elfa_auto_validate",
@@ -117,7 +129,10 @@
         "idempotentHint": true,
         "openWorldHint": false
       },
-      "operations": ["auto-validate-query-v2", "auto-validate-query-draft-v2"]
+      "operations": [
+        "auto-validate-query-v2",
+        "auto-validate-query-draft-v2"
+      ]
     },
     {
       "name": "elfa_auto_query",
