@@ -32,6 +32,7 @@ export function buildDeps(
     retries: config.retries,
     ...(hmacSecret ? { hmacSecret } : {}),
     ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}),
+    ...(config.extraHeaders ? { headers: config.extraHeaders } : {}),
   });
 
   return {

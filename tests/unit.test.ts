@@ -206,3 +206,25 @@ describe("mentions without an author", () => {
     expect(shaped.verified).toBe(true);
   });
 });
+
+describe("extra headers", () => {
+  it("parses a JSON object of headers", () => {
+    expect(loadConfig({ ELFA_EXTRA_HEADERS: '{"X-Trace":"abc"}' }).extraHeaders).toEqual({
+      "X-Trace": "abc",
+    });
+  });
+
+  it("refuses to let a caller override authentication headers", () => {
+    expect(
+      loadConfig({
+        ELFA_EXTRA_HEADERS: '{"x-elfa-api-key":"stolen","X-Elfa-Signature":"forged","X-Ok":"1"}',
+      }).extraHeaders,
+    ).toEqual({ "X-Ok": "1" });
+  });
+
+  it("ignores malformed or non-object values", () => {
+    for (const value of ["not json", "[1,2]", '"a string"', "{}", '{"a":1}']) {
+      expect(loadConfig({ ELFA_EXTRA_HEADERS: value }).extraHeaders, value).toBeUndefined();
+    }
+  });
+});
