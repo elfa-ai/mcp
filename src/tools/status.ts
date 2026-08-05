@@ -35,7 +35,7 @@ function summarise(data: Record<string, unknown>): Record<string, unknown> {
 
 export function registerStatus(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_status",
+    "api_status",
     {
       title: "API key status",
       description:

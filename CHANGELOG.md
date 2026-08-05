@@ -1,5 +1,32 @@
 # Changelog
 
+## 2.0.0
+
+### Changed
+
+- **Tool names no longer carry an `elfa_` prefix.** Every major client already namespaces tools by server, so the prefix was duplicated: opencode showed `elfa_elfa_status`, Claude Code `mcp__elfa__elfa_status`. This matches what most first-party MCP servers do — Playwright registers `browser_*`, not `playwright_*`.
+
+  | Before | After |
+  | --- | --- |
+  | `elfa_status` | `api_status` |
+  | `elfa_mentions` | `mentions` |
+  | `elfa_trending` | `trending` |
+  | `elfa_narratives` | `narratives` |
+  | `elfa_account_stats` | `account_stats` |
+  | `elfa_chat` | `market_chat` |
+  | `elfa_auto_build` | `auto_build` |
+  | `elfa_auto_validate` | `auto_validate` |
+  | `elfa_auto_query` | `auto_query` |
+  | `elfa_auto_query_write` | `auto_query_write` |
+  | `elfa_auto_draft` | `auto_draft` |
+  | `elfa_auto_exchanges` | `auto_exchanges` |
+
+  `status` and `chat` are qualified rather than left bare, because those are exactly the generic names that collide in clients which do not namespace.
+
+  The old names are gone rather than aliased. Clients discover tools at startup, so nothing needs changing in normal use, but anything that pins a tool name — permission rules, hook matchers, allow-lists — needs updating.
+
+- Tool descriptions that referred to sibling tools now use the new names.
+
 ## 1.0.2
 
 Fixes found by running every tool against a live API.

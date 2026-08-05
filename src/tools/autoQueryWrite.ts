@@ -7,11 +7,11 @@ import { eqlQueryArg, fail, requiresSignature, pickDefined, run } from "./util.j
 
 export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_auto_query_write",
+    "auto_query_write",
     {
       title: "Write Auto queries",
       description:
-        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again, so validate it with elfa_auto_validate and confirm the cost and the action with the user before calling this. Queries whose action places an order also need request signing.",
+        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again, so validate it with auto_validate and confirm the cost and the action with the user before calling this. Queries whose action places an order also need request signing.",
       inputSchema: {
         method: z
           .enum(["create", "cancel", "delete"])
@@ -48,13 +48,13 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
     async (args) => {
       if (args.method === "create") {
         if (!args.query) {
-          return fail("method=create needs a query. Build one with elfa_auto_build.");
+          return fail("method=create needs a query. Build one with auto_build.");
         }
         if (requiresSignature(args.query) && !deps.hasHmac) {
           return fail(missingCredential("hmacSecret"));
         }
       } else if (!args.queryId) {
-        return fail(`method=${args.method} needs queryId. Find one with elfa_auto_query.`);
+        return fail(`method=${args.method} needs queryId. Find one with auto_query.`);
       }
 
       return run(deps, async () => {

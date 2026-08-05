@@ -9,7 +9,7 @@ const EXCHANGES = ["hyperliquid", "gmx", "binance", "pacifica"] as const;
 
 export function registerAutoExchanges(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_auto_exchanges",
+    "auto_exchanges",
     {
       title: "Auto exchange connections",
       description:

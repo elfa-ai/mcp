@@ -17,7 +17,7 @@ import {
 
 export function registerMentions(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_mentions",
+    "mentions",
     {
       title: "Mentions",
       description:

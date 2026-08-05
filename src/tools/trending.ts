@@ -7,7 +7,7 @@ import { fromArg, pageArg, pageSizeArg, pickDefined, run, toArg } from "./util.j
 
 export function registerTrending(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_trending",
+    "trending",
     {
       title: "Trending",
       description:

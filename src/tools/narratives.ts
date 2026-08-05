@@ -6,11 +6,11 @@ import { fail, fromArg, pickDefined, run, timeWindowArg, toArg } from "./util.js
 
 export function registerNarratives(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_narratives",
+    "narratives",
     {
       title: "Narratives",
       description:
-        "Written narrative analysis with source links, for when counts are not enough. 5 credits per call, so prefer elfa_trending or elfa_mentions when metrics will do. scope=market extracts the narratives moving the market. scope=keywords summarises events for keywords you supply, and can take over a minute to return.",
+        "Written narrative analysis with source links, for when counts are not enough. 5 credits per call, so prefer trending or mentions when metrics will do. scope=market extracts the narratives moving the market. scope=keywords summarises events for keywords you supply, and can take over a minute to return.",
       inputSchema: {
         scope: z
           .enum(["market", "keywords"])
