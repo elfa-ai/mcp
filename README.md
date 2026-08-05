@@ -40,8 +40,13 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 | --- | --- | --- |
 | `ELFA_API_KEY` | yes | Authenticates every request |
 | `ELFA_HMAC_SECRET` | no | Signs Auto requests. Needed only to connect an exchange, or to run a query whose action places an order |
-| `ELFA_TIMEOUT` | no | Request timeout in ms, default `30000` |
+| `ELFA_TIMEOUT` | no | Request timeout in ms, default `120000` |
+| `ELFA_RETRIES` | no | Retries on failure, default `0` |
 | `ELFA_MCP_MAX_RESPONSE_CHARS` | no | Response size ceiling, default `60000` |
+
+The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints.
+
+Some MCP clients apply their own timeout, often around 60 seconds. `elfa_narratives` and `elfa_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
 
 Without `ELFA_HMAC_SECRET` everything still works except exchange linking and order-placing queries — those return a message telling you what to set.
 

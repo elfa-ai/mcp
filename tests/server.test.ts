@@ -137,3 +137,41 @@ describe("server", () => {
     await server.close();
   });
 });
+
+describe("elfa_status", () => {
+  it("never returns the api key, contact details or internal identifiers", async () => {
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "1.0.0" });
+    const server = createServer({
+      sdk: {
+        ping: async () => ({ success: true, data: { message: "ok" } }),
+        getApiKeyStatus: async () => ({
+          success: true,
+          data: {
+            key: "elfak_secret_value",
+            email: "someone@example.com",
+            userId: 999,
+            name: "privy_did:privy:abc123",
+            id: 42,
+            tier: "payg",
+            status: "active",
+            usage: { daily: 1, monthly: 2 },
+          },
+        }),
+      } as unknown as Deps["sdk"],
+      hasHmac: false,
+      maxResponseChars: 60000,
+    });
+
+    await Promise.all([client.connect(ct), server.connect(st)]);
+    const result = await client.callTool({ name: "elfa_status", arguments: {} });
+    const serialised = JSON.stringify(result);
+
+    for (const secret of ["elfak_secret_value", "someone@example.com", "privy_did", "999"]) {
+      expect(serialised.includes(secret), `leaked ${secret}`).toBe(false);
+    }
+    expect(serialised).toContain("payg");
+
+    await server.close();
+  });
+});

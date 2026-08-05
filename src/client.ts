@@ -29,6 +29,7 @@ export function buildDeps(
   const sdk = new ElfaSDK({
     elfaApiKey: apiKey,
     timeout: config.timeout,
+    retries: config.retries,
     ...(hmacSecret ? { hmacSecret } : {}),
     ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}),
   });

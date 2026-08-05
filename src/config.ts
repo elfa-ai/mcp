@@ -9,18 +9,26 @@ export interface ServerConfig {
   hmacSecret: string | undefined;
   baseUrl: string | undefined;
   timeout: number;
+  retries: number;
   maxResponseChars: number;
 }
 
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = "127.0.0.1";
-const DEFAULT_TIMEOUT = 30000;
+const DEFAULT_TIMEOUT = 120000;
+const DEFAULT_RETRIES = 0;
 const DEFAULT_MAX_RESPONSE_CHARS = 60000;
 
 function num(value: string | undefined, fallback: number): number {
   if (!value) return fallback;
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function count(value: string | undefined, fallback: number): number {
+  if (!value) return fallback;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback;
 }
 
 function list(value: string | undefined): string[] {
@@ -44,6 +52,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     hmacSecret: env.ELFA_HMAC_SECRET || undefined,
     baseUrl: env.ELFA_BASE_URL || undefined,
     timeout: num(env.ELFA_TIMEOUT, DEFAULT_TIMEOUT),
+    retries: count(env.ELFA_RETRIES, DEFAULT_RETRIES),
     maxResponseChars: num(
       env.ELFA_MCP_MAX_RESPONSE_CHARS,
       DEFAULT_MAX_RESPONSE_CHARS,

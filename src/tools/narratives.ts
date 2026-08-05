@@ -10,7 +10,7 @@ export function registerNarratives(server: McpServer, deps: Deps): void {
     {
       title: "Narratives",
       description:
-        "Written narrative analysis with source links, for when counts are not enough. 5 credits per call, so prefer elfa_trending or elfa_mentions when metrics will do. scope=market extracts the narratives moving the market. scope=keywords summarises events for keywords you supply.",
+        "Written narrative analysis with source links, for when counts are not enough. 5 credits per call, so prefer elfa_trending or elfa_mentions when metrics will do. scope=market extracts the narratives moving the market. scope=keywords summarises events for keywords you supply, and can take over a minute to return.",
       inputSchema: {
         scope: z
           .enum(["market", "keywords"])
@@ -50,6 +50,8 @@ export function registerNarratives(server: McpServer, deps: Deps): void {
         scope: z.string(),
         notice: z.string(),
         items: z.array(z.record(z.unknown())),
+        matched: z.number().nullable(),
+        note: z.string().nullable(),
       },
       annotations: {
         readOnlyHint: true,
@@ -84,15 +86,24 @@ export function registerNarratives(server: McpServer, deps: Deps): void {
             }) as { keywords: string },
           );
 
+          const items = asArray<{ summary: string; sourceLinks: string[] }>(
+            response.data,
+          ).map((entry) => ({
+            summary: entry.summary,
+            sources: asArray<string>(entry.sourceLinks),
+          }));
+
+          const matched = response.metadata?.total ?? null;
+
           return {
             scope: args.scope,
             notice: UNTRUSTED_NOTICE,
-            items: asArray<{ summary: string; sourceLinks: string[] }>(
-              response.data,
-            ).map((entry) => ({
-              summary: entry.summary,
-              sources: asArray<string>(entry.sourceLinks),
-            })),
+            items,
+            matched,
+            note:
+              items.length === 0 && matched
+                ? `Matched ${matched} mentions but produced no summary. Try a narrower keyword set or a different time window.`
+                : null,
           };
         }
 
@@ -104,15 +115,22 @@ export function registerNarratives(server: McpServer, deps: Deps): void {
           }),
         );
 
+        const items = asArray<{ narrative: string; source_links: string[] }>(
+          response.data?.trending_narratives,
+        ).map((entry) => ({
+          narrative: entry.narrative,
+          sources: asArray<string>(entry.source_links),
+        }));
+
         return {
           scope: args.scope,
           notice: UNTRUSTED_NOTICE,
-          items: asArray<{ narrative: string; source_links: string[] }>(
-            response.data?.trending_narratives,
-          ).map((entry) => ({
-            narrative: entry.narrative,
-            sources: asArray<string>(entry.source_links),
-          })),
+          items,
+          matched: response.data?.metadata?.total_tweets ?? null,
+          note:
+            items.length === 0
+              ? "No narratives were produced for this window. Try timeFrame=week."
+              : null,
         };
       });
     },

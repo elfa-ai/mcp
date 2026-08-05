@@ -1,7 +1,37 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
+import { describeError } from "../errors.js";
 import { run } from "./util.js";
+
+const REPORTED = [
+  "tier",
+  "status",
+  "isExpired",
+  "expiresAt",
+  "billingMode",
+  "usage",
+  "limits",
+  "remainingRequests",
+  "dailyRequestLimit",
+  "monthlyRequestLimit",
+  "requestsPerMinute",
+  "allowOverage",
+  "bonusCredits",
+  "depositCredits",
+  "spendCapCredits",
+  "athenaEnabled",
+  "hmacEnabled",
+  "scopes",
+] as const;
+
+function summarise(data: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const field of REPORTED) {
+    if (data[field] !== undefined) out[field] = data[field];
+  }
+  return out;
+}
 
 export function registerStatus(server: McpServer, deps: Deps): void {
   server.registerTool(
@@ -14,6 +44,7 @@ export function registerStatus(server: McpServer, deps: Deps): void {
       outputSchema: {
         reachable: z.boolean(),
         key: z.record(z.unknown()).nullable(),
+        problem: z.string().nullable(),
       },
       annotations: {
         readOnlyHint: true,
@@ -33,7 +64,11 @@ export function registerStatus(server: McpServer, deps: Deps): void {
           reachable: ping.status === "fulfilled",
           key:
             status.status === "fulfilled"
-              ? (status.value.data as unknown as Record<string, unknown>)
+              ? summarise(status.value.data as unknown as Record<string, unknown>)
+              : null,
+          problem:
+            status.status === "rejected"
+              ? describeError(status.reason)
               : null,
         };
       }),

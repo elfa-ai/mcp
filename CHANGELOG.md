@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.2
+
+Fixes found by running every tool against a live API.
+
+- `elfa_status` returned the raw key-status payload, which includes the API key itself, the account email and internal identifiers. It now reports only tier, limits, usage, scopes and expiry, and surfaces the reason when the key lookup fails
+- Default timeout raised to 120s. The LLM-backed endpoints regularly take longer than 30s, so they timed out before returning
+- Retries now default to 0. A timed-out request to a credit-charging endpoint was retried three times and billed each time, so a failed call could cost four times its price
+- `elfa_narratives` reports how many mentions matched, and says so when the summariser returns nothing, instead of an unexplained empty list
+
 ## 1.0.1
 
 First release of the TypeScript server, published as `@elfa-ai/mcp`.
