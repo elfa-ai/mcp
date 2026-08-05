@@ -96,11 +96,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Get package info
         id: package
         run: |
           echo "name=$(node -p "require('./package.json').name")" >> $GITHUB_OUTPUT
           echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Build desktop bundle
+        run: npm run build:bundle
 
       - name: Generate release notes
         env:
@@ -150,5 +161,6 @@ jobs:
           tag_name: v${{ steps.package.outputs.version }}
           name: Release v${{ steps.package.outputs.version }}
           body_path: RELEASE_NOTES.md
+          files: build/elfa-mcp-${{ steps.package.outputs.version }}.mcpb
           draft: false
           prerelease: ${{ contains(steps.package.outputs.version, '-') }}

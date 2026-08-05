@@ -37,7 +37,8 @@
     "docs:tools": "tsx scripts/gen-tool-table.ts",
     "docs:check": "tsx scripts/gen-tool-table.ts --check",
     "verify": "npm run typecheck && npm run test && npm run check:drift && npm run docs:check",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "build:bundle": "tsx scripts/build-bundle.ts"
   },
   "keywords": [
     "elfa",
@@ -63,6 +64,7 @@
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@anthropic-ai/mcpb": "^2.1.2",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.0",
     "tsup": "^8.5.1",
