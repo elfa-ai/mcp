@@ -8,6 +8,15 @@ Works with any MCP client: Claude Code, Claude Desktop, Cursor, VS Code, Codex, 
 
 Get an API key at [dev.elfa.ai](https://dev.elfa.ai). No install step — `npx` fetches the server on demand.
 
+**One click**
+
+[![Add to Cursor](https://img.shields.io/badge/Add%20to-Cursor-000000?style=flat-square)](cursor://anysphere.cursor-deeplink/mcp/install?name=elfa&config=eyJjb21tYW5kIjoibnB4IiwiYXJncyI6WyIteSIsIkBlbGZhLWFpL21jcCJdLCJlbnYiOnsiRUxGQV9BUElfS0VZIjoiJHtpbnB1dDplbGZhQXBpS2V5fSJ9fQ==)
+[![Add to VS Code](https://img.shields.io/badge/Add%20to-VS%20Code-0098FF?style=flat-square)](https://vscode.dev/redirect/mcp/install?name=elfa&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40elfa-ai%2Fmcp%22%5D%2C%22env%22%3A%7B%22ELFA_API_KEY%22%3A%22%24%7Binput%3AelfaApiKey%7D%22%7D%7D)
+
+**Claude Desktop**
+
+Download `elfa-mcp-<version>.mcpb` from the [latest release](https://github.com/elfa-ai/mcp/releases/latest) and open it. Claude Desktop installs it, prompts for your API key, and keeps it updated. Nothing else to configure.
+
 **Claude Code**
 
 ```bash
