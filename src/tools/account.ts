@@ -5,7 +5,7 @@ import { run, stripHandle } from "./util.js";
 
 export function registerAccountStats(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_account_stats",
+    "account_stats",
     {
       title: "Account stats",
       description:

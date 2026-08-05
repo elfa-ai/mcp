@@ -56,7 +56,7 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 
 The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints.
 
-Some MCP clients apply their own timeout, often around 60 seconds. `elfa_narratives` and `elfa_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
+Some MCP clients apply their own timeout, often around 60 seconds. `narratives` and `market_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
 
 Without `ELFA_HMAC_SECRET` everything still works except exchange linking and order-placing queries — those return a message telling you what to set.
 
@@ -68,24 +68,24 @@ Without `ELFA_HMAC_SECRET` everything still works except exchange linking and or
 
 | Tool | Mode | Cost | What it does |
 | --- | --- | --- | --- |
-| `elfa_status` | read | Free | Check API key tier, credit usage and remaining requests. Also confirms the API is reachable. |
-| `elfa_mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed. |
-| `elfa_trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
-| `elfa_narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
-| `elfa_account_stats` | read | 1 per call | Smart follower and engagement stats for an X account. |
-| `elfa_chat` | read | Varies by speed | Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis. |
-| `elfa_auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
-| `elfa_auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating. Accepts an inline query or a draft id. |
-| `elfa_auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
-| `elfa_auto_query_write` | write | 5 plus LLM usage to create, free to cancel or delete | Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met. |
-| `elfa_auto_draft` | write | Free, except convert which costs the same as creating a query | Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query. |
-| `elfa_auto_exchanges` | write | Free | List, connect and disconnect the exchange accounts Auto uses for order actions, and check whether a symbol is tradeable. |
+| `api_status` | read | Free | Check API key tier, credit usage and remaining requests. Also confirms the API is reachable. |
+| `mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed. |
+| `trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
+| `narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
+| `account_stats` | read | 1 per call | Smart follower and engagement stats for an X account. |
+| `market_chat` | read | Varies by speed | Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis. |
+| `auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
+| `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating. Accepts an inline query or a draft id. |
+| `auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
+| `auto_query_write` | write | 5 plus LLM usage to create, free to cancel or delete | Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met. |
+| `auto_draft` | write | Free, except convert which costs the same as creating a query | Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query. |
+| `auto_exchanges` | write | Free | List, connect and disconnect the exchange accounts Auto uses for order actions, and check whether a symbol is tradeable. |
 
 Not exposed as tools:
 
-- `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. elfa_chat covers the same analysis.
-- `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with elfa_auto_query.
-- `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with elfa_auto_query.
+- `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
+- `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
+- `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 
 <!-- tools:end -->
 
@@ -110,9 +110,9 @@ Auto queries run unattended. Once armed, a query keeps evaluating and fires its 
 
 The flow is three steps:
 
-1. `elfa_auto_build` — describe what to watch in plain language, get EQL back
-2. `elfa_auto_validate` — check the syntax and get the credit cost
-3. `elfa_auto_query_write` — activate it
+1. `auto_build` — describe what to watch in plain language, get EQL back
+2. `auto_validate` — check the syntax and get the credit cost
+3. `auto_query_write` — activate it
 
 Actions can notify you, call a webhook, message a Telegram bot, run an LLM analysis, or place an order on a connected exchange. Order actions need `ELFA_HMAC_SECRET` and a connected exchange.
 
@@ -127,7 +127,7 @@ Actions can notify you, call a webhook, message a Telegram bot, run an LLM analy
 
 Credentials are verified on connect, so a wrong value fails there rather than when an order fires. They are ordinary tool arguments, so they pass through the model and land in the client's transcript.
 
-There is no push channel over MCP. Poll `elfa_auto_query` with `method=get`, and wait for the returned `pollAfterSeconds` between calls.
+There is no push channel over MCP. Poll `auto_query` with `method=get`, and wait for the returned `pollAfterSeconds` between calls.
 
 ## Remote server
 
@@ -141,10 +141,10 @@ It is stateless — no sessions, one server instance per request, safe behind a 
 
 ## Safety
 
-`elfa_status` is the fastest way to tell an auth problem from a credit problem.
+`api_status` is the fastest way to tell an auth problem from a credit problem.
 
 
-Mentions, news and narratives return third-party social text that anyone can write. The server marks it as untrusted in every response, and the server instructions tell the model to treat it as data. Keep that in mind before letting an agent chain from that content into `elfa_auto_query_write` or `elfa_auto_exchanges`.
+Mentions, news and narratives return third-party social text that anyone can write. The server marks it as untrusted in every response, and the server instructions tell the model to treat it as data. Keep that in mind before letting an agent chain from that content into `auto_query_write` or `auto_exchanges`.
 
 ## Development
 

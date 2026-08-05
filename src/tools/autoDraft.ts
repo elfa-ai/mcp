@@ -7,7 +7,7 @@ import { eqlQueryArg, fail, requiresSignature, pickDefined, run } from "./util.j
 
 export function registerAutoDraft(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_auto_draft",
+    "auto_draft",
     {
       title: "Auto drafts",
       description:
@@ -48,7 +48,7 @@ export function registerAutoDraft(server: McpServer, deps: Deps): void {
     async (args) => {
       if (args.method === "upsert") {
         if (!args.query) {
-          return fail("method=upsert needs a query. Build one with elfa_auto_build.");
+          return fail("method=upsert needs a query. Build one with auto_build.");
         }
         if (requiresSignature(args.query) && !deps.hasHmac) {
           return fail(missingCredential("hmacSecret"));

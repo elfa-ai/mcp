@@ -7,7 +7,7 @@ const ACTIVE = new Set(["active", "pending", "running", "armed"]);
 
 export function registerAutoQuery(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_auto_query",
+    "auto_query",
     {
       title: "Read Auto queries",
       description:

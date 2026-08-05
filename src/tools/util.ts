@@ -54,7 +54,7 @@ export const repostsArg = z
 export const eqlQueryArg = z
   .record(z.unknown())
   .describe(
-    "EQL query object with conditions, actions and expiresIn. Build it with elfa_auto_build and check it with elfa_auto_validate first.",
+    "EQL query object with conditions, actions and expiresIn. Build it with auto_build and check it with auto_validate first.",
   );
 
 export function run(

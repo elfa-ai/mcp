@@ -5,7 +5,7 @@ import { fail, pickDefined, run, stripHandle } from "./util.js";
 
 export function registerChat(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_chat",
+    "market_chat",
     {
       title: "Market chat",
       description:

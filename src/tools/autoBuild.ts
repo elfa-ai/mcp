@@ -6,11 +6,11 @@ import { pickDefined, run } from "./util.js";
 
 export function registerAutoBuild(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_auto_build",
+    "auto_build",
     {
       title: "Auto query builder",
       description:
-        "Turn a plain-language monitoring request into an EQL query. Costs 1 credit plus LLM usage. This only drafts the query, nothing starts running until you activate it with elfa_auto_query_write. Say what to watch, the threshold, and what should happen when it fires.",
+        "Turn a plain-language monitoring request into an EQL query. Costs 1 credit plus LLM usage. This only drafts the query, nothing starts running until you activate it with auto_query_write. Say what to watch, the threshold, and what should happen when it fires.",
       inputSchema: {
         message: z
           .string()

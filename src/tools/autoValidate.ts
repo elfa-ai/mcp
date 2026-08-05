@@ -7,11 +7,11 @@ import { eqlQueryArg, fail, pickDefined, run } from "./util.js";
 
 export function registerAutoValidate(server: McpServer, deps: Deps): void {
   server.registerTool(
-    "elfa_auto_validate",
+    "auto_validate",
     {
       title: "Validate Auto query",
       description:
-        "Check EQL syntax and get a cost estimate before anything is activated. Free. Always run this before elfa_auto_query_write, and show the estimated cost to the user. Pass either an inline query or a draftId.",
+        "Check EQL syntax and get a cost estimate before anything is activated. Free. Always run this before auto_query_write, and show the estimated cost to the user. Pass either an inline query or a draftId.",
       inputSchema: {
         query: eqlQueryArg.optional(),
         draftId: z

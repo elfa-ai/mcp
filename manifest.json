@@ -1,14 +1,14 @@
 {
   "server": {
     "name": "elfa",
-    "version": "1.0.2",
+    "version": "2.0.0",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": "/v2"
   },
   "tools": [
     {
-      "name": "elfa_status",
+      "name": "api_status",
       "title": "API key status",
       "summary": "Check API key tier, credit usage and remaining requests. Also confirms the API is reachable.",
       "credits": "Free",
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "name": "elfa_mentions",
+      "name": "mentions",
       "title": "Mentions",
       "summary": "Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed.",
       "credits": "1 per call",
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "name": "elfa_trending",
+      "name": "trending",
       "title": "Trending",
       "summary": "What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses.",
       "credits": "1 per call",
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "name": "elfa_narratives",
+      "name": "narratives",
       "title": "Narratives",
       "summary": "Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords.",
       "credits": "5 per call",
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "name": "elfa_account_stats",
+      "name": "account_stats",
       "title": "Account stats",
       "summary": "Smart follower and engagement stats for an X account.",
       "credits": "1 per call",
@@ -89,7 +89,7 @@
       ]
     },
     {
-      "name": "elfa_chat",
+      "name": "market_chat",
       "title": "Market chat",
       "summary": "Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis.",
       "credits": "Varies by speed",
@@ -104,7 +104,7 @@
       ]
     },
     {
-      "name": "elfa_auto_build",
+      "name": "auto_build",
       "title": "Auto query builder",
       "summary": "Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself.",
       "credits": "1 plus LLM usage",
@@ -119,7 +119,7 @@
       ]
     },
     {
-      "name": "elfa_auto_validate",
+      "name": "auto_validate",
       "title": "Validate Auto query",
       "summary": "Check EQL syntax and get a cost estimate before activating. Accepts an inline query or a draft id.",
       "credits": "Free",
@@ -135,7 +135,7 @@
       ]
     },
     {
-      "name": "elfa_auto_query",
+      "name": "auto_query",
       "title": "Read Auto queries",
       "summary": "Read side of Auto: list queries, poll one query, and read its executions and LLM sessions.",
       "credits": "Free",
@@ -155,7 +155,7 @@
       ]
     },
     {
-      "name": "elfa_auto_query_write",
+      "name": "auto_query_write",
       "title": "Write Auto queries",
       "summary": "Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met.",
       "credits": "5 plus LLM usage to create, free to cancel or delete",
@@ -172,7 +172,7 @@
       ]
     },
     {
-      "name": "elfa_auto_draft",
+      "name": "auto_draft",
       "title": "Auto drafts",
       "summary": "Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query.",
       "credits": "Free, except convert which costs the same as creating a query",
@@ -191,7 +191,7 @@
       ]
     },
     {
-      "name": "elfa_auto_exchanges",
+      "name": "auto_exchanges",
       "title": "Auto exchange connections",
       "summary": "List, connect and disconnect the exchange accounts Auto uses for order actions, and check whether a symbol is tradeable.",
       "credits": "Free",
@@ -213,17 +213,17 @@
     {
       "operationId": "chat-stream-v2",
       "reason": "sse",
-      "note": "A tool call returns one result, so streaming adds nothing. elfa_chat covers the same analysis."
+      "note": "A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis."
     },
     {
       "operationId": "auto-stream-queries-v2",
       "reason": "sse",
-      "note": "Long lived streams have no tool equivalent. Poll with elfa_auto_query."
+      "note": "Long lived streams have no tool equivalent. Poll with auto_query."
     },
     {
       "operationId": "auto-stream-query-v2",
       "reason": "sse",
-      "note": "Long lived streams have no tool equivalent. Poll with elfa_auto_query."
+      "note": "Long lived streams have no tool equivalent. Poll with auto_query."
     }
   ]
 }

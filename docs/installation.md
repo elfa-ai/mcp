@@ -71,7 +71,7 @@ Set `ELFA_API_KEY` in the environment Codex runs in.
 
 Auto can place orders on a connected exchange when a query fires. That path needs `ELFA_HMAC_SECRET`, issued alongside the API key, and an exchange connection.
 
-Binance and Pacifica connect with `elfa_auto_exchanges`. Hyperliquid and GMX use a wallet set up in the Elfa app.
+Binance and Pacifica connect with `auto_exchanges`. Hyperliquid and GMX use a wallet set up in the Elfa app.
 
 Everything else, including notification, webhook, Telegram and LLM actions, works with just the API key.
 
@@ -92,9 +92,9 @@ Put it behind TLS and set `ELFA_MCP_ALLOWED_ORIGINS` before exposing it.
 
 ## Verifying
 
-Ask the client *"what's trending in crypto right now?"*. It should call `elfa_trending`.
+Ask the client *"what's trending in crypto right now?"*. It should call `trending`.
 
-If a call fails, `elfa_status` reports whether the key is valid and how many credits remain.
+If a call fails, `api_status` reports whether the key is valid and how many credits remain.
 
 ## Troubleshooting
 

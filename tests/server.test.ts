@@ -72,9 +72,9 @@ describe("server", () => {
       .sort();
 
     expect(writers).toEqual([
-      "elfa_auto_draft",
-      "elfa_auto_exchanges",
-      "elfa_auto_query_write",
+      "auto_draft",
+      "auto_exchanges",
+      "auto_query_write",
     ]);
 
     await server.close();
@@ -106,7 +106,7 @@ describe("server", () => {
     const { client, server } = await connect();
 
     const result = await client.callTool({
-      name: "elfa_mentions",
+      name: "mentions",
       arguments: { mode: "top" },
     });
 
@@ -120,7 +120,7 @@ describe("server", () => {
     const { client, server } = await connect();
 
     const result = await client.callTool({
-      name: "elfa_auto_query_write",
+      name: "auto_query_write",
       arguments: {
         method: "create",
         query: {
@@ -138,7 +138,7 @@ describe("server", () => {
   });
 });
 
-describe("elfa_status", () => {
+describe("api_status", () => {
   it("never returns the api key, contact details or internal identifiers", async () => {
     const [ct, st] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: "test", version: "1.0.0" });
@@ -164,7 +164,7 @@ describe("elfa_status", () => {
     });
 
     await Promise.all([client.connect(ct), server.connect(st)]);
-    const result = await client.callTool({ name: "elfa_status", arguments: {} });
+    const result = await client.callTool({ name: "api_status", arguments: {} });
     const serialised = JSON.stringify(result);
 
     for (const secret of ["elfak_secret_value", "someone@example.com", "privy_did", "999"]) {
