@@ -52,6 +52,7 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 | `ELFA_TIMEOUT` | no | Request timeout in ms, default `120000` |
 | `ELFA_RETRIES` | no | Retries on failure, default `0` |
 | `ELFA_MCP_MAX_RESPONSE_CHARS` | no | Response size ceiling, default `60000` |
+| `ELFA_EXTRA_HEADERS` | no | JSON object of extra headers to send upstream, for proxies and non-production environments |
 
 The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints.
 
