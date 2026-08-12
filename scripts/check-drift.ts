@@ -23,7 +23,6 @@ const pkg = load<{ version: string }>("package.json");
 const registry = load<{ version: string; packages: Array<{ version: string }> }>(
   "server.json",
 );
-const plugin = load<{ version: string }>(".cursor-plugin/plugin.json");
 const scope = manifest.server.specScope;
 
 const versions = new Set([
@@ -31,7 +30,6 @@ const versions = new Set([
   manifest.server.version,
   registry.version,
   ...registry.packages.map((entry) => entry.version),
-  plugin.version,
 ]);
 
 const spec = new Set<string>();
@@ -84,7 +82,7 @@ if (duplicates.length > 0) {
 
 if (versions.size > 1) {
   problems.push(
-    `Version mismatch across package.json, manifest.json, server.json and .cursor-plugin/plugin.json: ${[...versions].join(", ")}`,
+    `Version mismatch across package.json, manifest.json and server.json: ${[...versions].join(", ")}`,
   );
 }
 
