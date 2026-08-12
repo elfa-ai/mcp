@@ -12,25 +12,17 @@ Both values are issued by the developer portal. The HMAC secret is shown once an
 
 Client config files that hold these values are plain text. Keep them out of version control.
 
-### Exchange credentials are the exception
-
-`elfa_auto_exchanges` with `method=connect` takes a `credentials` argument, because that is what the API expects in the request body. Some venues want an exchange API secret or a wallet private key there.
-
-Anything passed as a tool argument travels through the model and is written to the client's transcript and logs. That is a property of tool calls, not of this server. The tool tells the model to say so before asking for the values.
-
-Connecting through the developer portal instead is equally valid, and `method=list` will confirm either route worked. Wallet-based venues are configured in the portal and never need a secret here at all.
-
 ## Untrusted content
 
 Mentions, news and narratives are third-party social posts. Anyone can write them, including text designed to steer a model.
 
 The server marks that content as untrusted in every response and instructs the model to treat it as data. That is a mitigation, not a guarantee. When an agent can reach both this content and a tool that spends money, review the chain.
 
-## Actions that spend money or place orders
+## Actions that spend money
 
-`elfa_auto_query_write`, `elfa_auto_draft` and `elfa_auto_exchanges` are annotated as write tools so clients prompt before running them. An activated Auto query fires its action unattended, without a further prompt.
+`elfa_auto_query_write` and `elfa_auto_draft` are annotated as write tools so clients prompt before running them. An activated Auto query fires its action unattended, without a further prompt.
 
-Order-placing actions and exchange linking require `ELFA_HMAC_SECRET`. Leaving it unset removes that capability entirely and is the right default for anything untrusted or shared.
+Auto mutations that are not plain notifications require `ELFA_HMAC_SECRET`. Leaving it unset removes that capability entirely and is the right default for anything untrusted or shared.
 
 ## Remote deployments
 

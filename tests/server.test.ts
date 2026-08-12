@@ -71,11 +71,7 @@ describe("server", () => {
       .map((tool) => tool.name)
       .sort();
 
-    expect(writers).toEqual([
-      "auto_draft",
-      "auto_exchanges",
-      "auto_query_write",
-    ]);
+    expect(writers).toEqual(["auto_draft", "auto_query_write"]);
 
     await server.close();
   });
