@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "elfa": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@elfa-ai/mcp"],
+      "env": {
+        "ELFA_API_KEY": "${ELFA_API_KEY}",
+        "ELFA_HMAC_SECRET": "${ELFA_HMAC_SECRET}"
+      }
+    }
+  }
+}

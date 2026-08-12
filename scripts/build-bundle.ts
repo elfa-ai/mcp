@@ -45,7 +45,7 @@ const bundle = {
   description: pkg.description,
   long_description:
     "Crypto social intelligence from X and Telegram, plus Auto, a condition engine that watches the market and fires an action when your conditions are met.",
-  author: { name: "Elfa", url: "https://elfa.ai" },
+  author: { name: "Elfa AI", url: "https://elfa.ai" },
   repository: { type: "git", url: pkg.repository.url.replace(/^git\+/, "") },
   homepage: pkg.homepage,
   documentation: pkg.homepage,
