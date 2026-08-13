@@ -67,13 +67,11 @@ codex mcp add elfa -- npx -y @elfa-ai/mcp
 
 Set `ELFA_API_KEY` in the environment Codex runs in.
 
-## Auto trading actions
+## Auto request signing
 
-Auto can place orders on a connected exchange when a query fires. That path needs `ELFA_HMAC_SECRET`, issued alongside the API key, and an exchange connection.
+Some Auto mutations must be signed. That path needs `ELFA_HMAC_SECRET`, issued alongside the API key.
 
-Binance and Pacifica connect with `auto_exchanges`. Hyperliquid and GMX use a wallet set up in the Elfa app.
-
-Everything else, including notification, webhook, Telegram and LLM actions, works with just the API key.
+Notification-only queries — `notify`, `webhook`, `telegram_bot`, and `llm` with a notification callback — work with just the API key.
 
 ## Remote server
 

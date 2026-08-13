@@ -121,7 +121,7 @@
     {
       "name": "auto_validate",
       "title": "Validate Auto query",
-      "summary": "Check EQL syntax and get a cost estimate before activating. Accepts an inline query or a draft id.",
+      "summary": "Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue.",
       "credits": "Free",
       "annotations": {
         "readOnlyHint": true,
@@ -131,7 +131,8 @@
       },
       "operations": [
         "auto-validate-query-v2",
-        "auto-validate-query-draft-v2"
+        "auto-validate-query-draft-v2",
+        "auto-validate-symbol-v2"
       ]
     },
     {
@@ -189,24 +190,6 @@
         "auto-delete-query-draft-v2",
         "auto-convert-query-draft-v2"
       ]
-    },
-    {
-      "name": "auto_exchanges",
-      "title": "Auto exchange connections",
-      "summary": "List, connect and disconnect the exchange accounts Auto uses for order actions, and check whether a symbol is tradeable.",
-      "credits": "Free",
-      "annotations": {
-        "readOnlyHint": false,
-        "destructiveHint": true,
-        "idempotentHint": false,
-        "openWorldHint": false
-      },
-      "operations": [
-        "auto-list-exchanges-v2",
-        "auto-connect-exchange-v2",
-        "auto-disconnect-exchange-v2",
-        "auto-validate-symbol-v2"
-      ]
     }
   ],
   "unexposed": [
@@ -224,6 +207,21 @@
       "operationId": "auto-stream-query-v2",
       "reason": "sse",
       "note": "Long lived streams have no tool equivalent. Poll with auto_query."
+    },
+    {
+      "operationId": "auto-list-exchanges-v2",
+      "reason": "not-advertised",
+      "note": "Exchange connections are no longer part of the documented Auto surface."
+    },
+    {
+      "operationId": "auto-connect-exchange-v2",
+      "reason": "not-advertised",
+      "note": "Exchange connections are no longer part of the documented Auto surface."
+    },
+    {
+      "operationId": "auto-disconnect-exchange-v2",
+      "reason": "not-advertised",
+      "note": "Exchange connections are no longer part of the documented Auto surface."
     }
   ]
 }

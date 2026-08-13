@@ -11,7 +11,7 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
     {
       title: "Write Auto queries",
       description:
-        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again, so validate it with auto_validate and confirm the cost and the action with the user before calling this. Queries whose action places an order also need request signing.",
+        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again, so validate it with auto_validate and confirm the cost and the action with the user before calling this. Queries whose action is not a plain notification also need request signing.",
       inputSchema: {
         method: z
           .enum(["create", "cancel", "delete"])
