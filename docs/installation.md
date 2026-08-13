@@ -101,8 +101,8 @@ If a call fails, `api_status` reports whether the key is valid and how many cred
 | Server does not appear | Node is older than 20, or the client was not restarted |
 | Authentication failed | `ELFA_API_KEY` is missing, wrong, or expired |
 | Out of credits | The plan's monthly credits are used up |
-| Action requires request signing | `ELFA_HMAC_SECRET` is not set, and the request links an exchange or places an order |
-| Forbidden on an Auto trading call | Auto has not been enabled for the account in the developer portal |
+| Action requires request signing | `ELFA_HMAC_SECRET` is not set, and the mutation is not a plain notification |
+| Forbidden on an Auto call | Auto has not been enabled for the account in the developer portal |
 | Timestamp too far from server time | The machine's clock has drifted. Signed requests are rejected beyond 30 seconds |
 
 Claude Desktop logs are in `~/Library/Logs/Claude/mcp*.log` on macOS and `%APPDATA%\Claude\logs\mcp*.log` on Windows.

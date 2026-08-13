@@ -83,7 +83,7 @@ const bundle = {
       type: "string",
       title: "Signing secret",
       description:
-        "Optional. Needed only to connect an exchange or run an Auto query that places an order.",
+        "Optional. Signs Auto mutations that are not plain notifications.",
       sensitive: true,
       required: false,
     },

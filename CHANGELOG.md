@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.0
+
+### Removed
+
+- **The `auto_exchanges` tool is gone.** Exchange connections are no longer part of the documented Auto surface, so listing, connecting and disconnecting venues is no longer exposed here. The three operations are recorded in `manifest.json` under `unexposed`, so the drift check still accounts for every documented `/v2` operation. The endpoints remain reachable over the API for anyone who needs them.
+
+### Changed
+
+- **`validate_symbol` moved to `auto_validate`.** It is now `auto_validate` with `method=symbol`, taking `exchange` and `symbol`, and returns `valid: true/false` with the unsupported case reported as a validation error. The default `method=query` behaviour is unchanged.
+- **Eleven tools**, down from twelve.
+- Signing guidance everywhere — server instructions, `auto_query_write`, README, install docs, the desktop bundle and the registry entry — now describes `ELFA_HMAC_SECRET` as signing Auto mutations that are not plain notifications, rather than exchange linking and order placement.
+
 ## 2.0.0
 
 ### Changed
