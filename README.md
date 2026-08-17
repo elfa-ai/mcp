@@ -85,9 +85,6 @@ Not exposed as tools:
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
-- `auto-list-exchanges-v2` — Exchange connections are no longer part of the documented Auto surface.
-- `auto-connect-exchange-v2` — Exchange connections are no longer part of the documented Auto surface.
-- `auto-disconnect-exchange-v2` — Exchange connections are no longer part of the documented Auto surface.
 
 <!-- tools:end -->
 
