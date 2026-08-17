@@ -207,21 +207,6 @@
       "operationId": "auto-stream-query-v2",
       "reason": "sse",
       "note": "Long lived streams have no tool equivalent. Poll with auto_query."
-    },
-    {
-      "operationId": "auto-list-exchanges-v2",
-      "reason": "not-advertised",
-      "note": "Exchange connections are no longer part of the documented Auto surface."
-    },
-    {
-      "operationId": "auto-connect-exchange-v2",
-      "reason": "not-advertised",
-      "note": "Exchange connections are no longer part of the documented Auto surface."
-    },
-    {
-      "operationId": "auto-disconnect-exchange-v2",
-      "reason": "not-advertised",
-      "note": "Exchange connections are no longer part of the documented Auto surface."
     }
   ]
 }

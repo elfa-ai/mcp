@@ -84,7 +84,7 @@ ELFA_MCP_ALLOWED_ORIGINS=https://your-client.example \
 npx -y @elfa-ai/mcp
 ```
 
-The endpoint is `POST /mcp`. It is stateless, so it scales horizontally without sticky sessions. Clients send `x-elfa-api-key`, and `x-elfa-hmac-secret` when they need Auto trading actions. `GET /healthz` is a liveness probe.
+The endpoint is `POST /mcp`. It is stateless, so it scales horizontally without sticky sessions. Clients send `x-elfa-api-key`, and `x-elfa-hmac-secret` when an Auto mutation is not a plain notification. `GET /healthz` is a liveness probe.
 
 Put it behind TLS and set `ELFA_MCP_ALLOWED_ORIGINS` before exposing it.
 
