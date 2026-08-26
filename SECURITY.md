@@ -6,7 +6,7 @@ Open an [issue](https://github.com/elfa-ai/mcp/issues), or email [support@elfa.a
 
 ## Credentials
 
-`ELFA_API_KEY` is issued by the developer portal. It is read from the environment only, and is never accepted as a tool argument, so it does not end up in model context or client transcripts. It is never logged.
+`ELFA_API_KEY` is issued by the developer portal. On stdio it is read from the environment; over HTTP it can also arrive per request as an `x-elfa-api-key` header, which takes precedence over the environment. It is never accepted as a tool argument, so it does not end up in model context or client transcripts. It is never logged.
 
 Client config files that hold this value are plain text. Keep them out of version control.
 
