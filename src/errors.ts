@@ -18,11 +18,8 @@ function messageOf(error: unknown): string {
   return "Unknown error";
 }
 
-export function missingCredential(what: "apiKey" | "hmacSecret"): string {
-  if (what === "apiKey") {
-    return `No Elfa API key configured. Set ELFA_API_KEY in the MCP server environment, or send it as an x-elfa-api-key header when using the HTTP transport. Get a key at ${DOCS}.`;
-  }
-  return `This action requires request signing. Set ELFA_HMAC_SECRET in the MCP server environment, then retry. Notification-only Auto queries work without it. See ${DOCS}/auto/api-key-auth.`;
+export function missingCredential(): string {
+  return `No Elfa API key configured. Set ELFA_API_KEY in the MCP server environment, or send it as an x-elfa-api-key header when using the HTTP transport. Get a key at ${DOCS}.`;
 }
 
 export function describeError(error: unknown): string {
@@ -33,7 +30,7 @@ export function describeError(error: unknown): string {
     case 400:
       return `Request rejected as invalid: ${detail}. Check the argument values and retry.`;
     case 401:
-      return `Authentication failed: ${detail}. Verify ELFA_API_KEY, and ELFA_HMAC_SECRET if this action requires signing.`;
+      return `Authentication failed: ${detail}. Verify ELFA_API_KEY.`;
     case 402:
       return `Out of credits: ${detail}. Top up or upgrade the plan, then retry.`;
     case 403:

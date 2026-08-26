@@ -62,7 +62,6 @@ const bundle = {
       args: ["${__dirname}/server/index.js"],
       env: {
         ELFA_API_KEY: "${user_config.elfa_api_key}",
-        ELFA_HMAC_SECRET: "${user_config.elfa_hmac_secret}",
       },
     },
   },
@@ -78,14 +77,6 @@ const bundle = {
       description: "Your Elfa API key from dev.elfa.ai",
       sensitive: true,
       required: true,
-    },
-    elfa_hmac_secret: {
-      type: "string",
-      title: "Signing secret",
-      description:
-        "Optional. Signs Auto mutations that are not plain notifications.",
-      sensitive: true,
-      required: false,
     },
   },
   compatibility: {

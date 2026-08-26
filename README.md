@@ -48,7 +48,6 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `ELFA_API_KEY` | yes | Authenticates every request |
-| `ELFA_HMAC_SECRET` | no | Signs Auto mutations when signing is required. Notification-only query mutations do not need it |
 | `ELFA_TIMEOUT` | no | Request timeout in ms, default `120000` |
 | `ELFA_RETRIES` | no | Retries on failure, default `0` |
 | `ELFA_MCP_MAX_RESPONSE_CHARS` | no | Response size ceiling, default `60000` |
@@ -57,8 +56,6 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints.
 
 Some MCP clients apply their own timeout, often around 60 seconds. `narratives` and `market_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
-
-Without `ELFA_HMAC_SECRET` notification-only Auto mutations still work. Anything else returns a message telling you what to set.
 
 ## Tools
 
@@ -82,6 +79,7 @@ Without `ELFA_HMAC_SECRET` notification-only Auto mutations still work. Anything
 
 Not exposed as tools:
 
+- `getMarketEvents-v2` — Available only to select Enterprise customers, and the published operation takes no parameters. Contact sales@elfa.ai for access.
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
@@ -125,7 +123,7 @@ The same server runs over Streamable HTTP for hosted deployments:
 ELFA_MCP_TRANSPORT=http ELFA_MCP_PORT=3000 npx -y @elfa-ai/mcp
 ```
 
-It is stateless — no sessions, one server instance per request, safe behind a load balancer. Credentials come from `x-elfa-api-key` and `x-elfa-hmac-secret` request headers, falling back to the environment. Set `ELFA_MCP_ALLOWED_ORIGINS` to a comma separated allowlist when exposing it publicly.
+It is stateless — no sessions, one server instance per request, safe behind a load balancer. Credentials come from the `x-elfa-api-key` request header, falling back to the environment. Set `ELFA_MCP_ALLOWED_ORIGINS` to a comma separated allowlist when exposing it publicly.
 
 ## Safety
 

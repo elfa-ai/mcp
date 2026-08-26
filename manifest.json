@@ -194,6 +194,11 @@
   ],
   "unexposed": [
     {
+      "operationId": "getMarketEvents-v2",
+      "reason": "restricted",
+      "note": "Available only to select Enterprise customers, and the published operation takes no parameters. Contact sales@elfa.ai for access."
+    },
+    {
       "operationId": "chat-stream-v2",
       "reason": "sse",
       "note": "A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis."

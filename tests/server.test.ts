@@ -13,7 +13,6 @@ const manifest = JSON.parse(
 function deps(): Deps {
   return {
     sdk: {} as Deps["sdk"],
-    hasHmac: false,
     maxResponseChars: 60000,
   };
 }
@@ -80,7 +79,7 @@ describe("server", () => {
     const { client, server } = await connect();
     const { tools } = await client.listTools();
 
-    const banned = ["apikey", "apiKey", "hmac", "hmacsecret", "elfaApiKey"];
+    const banned = ["apikey", "apiKey", "elfaApiKey"];
 
     for (const tool of tools) {
       const properties = Object.keys(
@@ -111,27 +110,6 @@ describe("server", () => {
 
     await server.close();
   });
-
-  it("refuses order-placing queries when no signing secret is configured", async () => {
-    const { client, server } = await connect();
-
-    const result = await client.callTool({
-      name: "auto_query_write",
-      arguments: {
-        method: "create",
-        query: {
-          conditions: { AND: [] },
-          actions: [{ stepId: "s1", type: "market_order", params: {} }],
-          expiresIn: "24h",
-        },
-      },
-    });
-
-    expect(result.isError).toBe(true);
-    expect(JSON.stringify(result.content)).toContain("ELFA_HMAC_SECRET");
-
-    await server.close();
-  });
 });
 
 describe("api_status", () => {
@@ -155,7 +133,6 @@ describe("api_status", () => {
           },
         }),
       } as unknown as Deps["sdk"],
-      hasHmac: false,
       maxResponseChars: 60000,
     });
 

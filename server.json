@@ -21,12 +21,6 @@
           "description": "Elfa API key from https://dev.elfa.ai",
           "isRequired": true,
           "isSecret": true
-        },
-        {
-          "name": "ELFA_HMAC_SECRET",
-          "description": "Signs Auto mutations that are not plain notifications",
-          "isRequired": false,
-          "isSecret": true
         }
       ]
     }

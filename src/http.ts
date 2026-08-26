@@ -61,7 +61,6 @@ export function createHttpApp(config: ServerConfig): express.Express {
     try {
       const deps = buildDeps(config, {
         apiKey: header(req, "x-elfa-api-key"),
-        hmacSecret: header(req, "x-elfa-hmac-secret"),
       });
 
       server = createServer(deps);

@@ -2,8 +2,7 @@ import { z } from "zod";
 import type { EqlQuery } from "@elfa-ai/sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
-import { missingCredential } from "../errors.js";
-import { eqlQueryArg, fail, requiresSignature, pickDefined, run } from "./util.js";
+import { eqlQueryArg, fail, pickDefined, run } from "./util.js";
 
 export function registerAutoDraft(server: McpServer, deps: Deps): void {
   server.registerTool(
@@ -49,9 +48,6 @@ export function registerAutoDraft(server: McpServer, deps: Deps): void {
       if (args.method === "upsert") {
         if (!args.query) {
           return fail("method=upsert needs a query. Build one with auto_build.");
-        }
-        if (requiresSignature(args.query) && !deps.hasHmac) {
-          return fail(missingCredential("hmacSecret"));
         }
       }
 

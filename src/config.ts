@@ -6,7 +6,6 @@ export interface ServerConfig {
   host: string;
   allowedOrigins: string[];
   apiKey: string | undefined;
-  hmacSecret: string | undefined;
   baseUrl: string | undefined;
   extraHeaders: Record<string, string> | undefined;
   timeout: number;
@@ -71,7 +70,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     host: env.ELFA_MCP_HOST || DEFAULT_HOST,
     allowedOrigins: list(env.ELFA_MCP_ALLOWED_ORIGINS),
     apiKey: env.ELFA_API_KEY || undefined,
-    hmacSecret: env.ELFA_HMAC_SECRET || undefined,
     baseUrl: env.ELFA_BASE_URL || undefined,
     extraHeaders: headers(env.ELFA_EXTRA_HEADERS),
     timeout: num(env.ELFA_TIMEOUT, DEFAULT_TIMEOUT),

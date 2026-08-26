@@ -67,12 +67,6 @@ codex mcp add elfa -- npx -y @elfa-ai/mcp
 
 Set `ELFA_API_KEY` in the environment Codex runs in.
 
-## Auto request signing
-
-Some Auto mutations must be signed. That path needs `ELFA_HMAC_SECRET`, issued alongside the API key.
-
-Notification-only queries — `notify`, `webhook`, `telegram_bot`, and `llm` with a notification callback — work with just the API key.
-
 ## Remote server
 
 For a hosted deployment, run the same package over Streamable HTTP:
@@ -84,7 +78,7 @@ ELFA_MCP_ALLOWED_ORIGINS=https://your-client.example \
 npx -y @elfa-ai/mcp
 ```
 
-The endpoint is `POST /mcp`. It is stateless, so it scales horizontally without sticky sessions. Clients send `x-elfa-api-key`, and `x-elfa-hmac-secret` when an Auto mutation is not a plain notification. `GET /healthz` is a liveness probe.
+The endpoint is `POST /mcp`. It is stateless, so it scales horizontally without sticky sessions. Clients send `x-elfa-api-key`. `GET /healthz` is a liveness probe.
 
 Put it behind TLS and set `ELFA_MCP_ALLOWED_ORIGINS` before exposing it.
 
@@ -101,8 +95,6 @@ If a call fails, `api_status` reports whether the key is valid and how many cred
 | Server does not appear | Node is older than 20, or the client was not restarted |
 | Authentication failed | `ELFA_API_KEY` is missing, wrong, or expired |
 | Out of credits | The plan's monthly credits are used up |
-| Action requires request signing | `ELFA_HMAC_SECRET` is not set, and the mutation is not a plain notification |
-| Forbidden on an Auto call | Auto has not been enabled for the account in the developer portal |
-| Timestamp too far from server time | The machine's clock has drifted. Signed requests are rejected beyond 30 seconds |
+| Forbidden on an Auto call | The key is not permitted to perform that Auto operation |
 
 Claude Desktop logs are in `~/Library/Logs/Claude/mcp*.log` on macOS and `%APPDATA%\Claude\logs\mcp*.log` on Windows.

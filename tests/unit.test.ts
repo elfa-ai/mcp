@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadConfig } from "../src/config.js";
 import { describeError, missingCredential } from "../src/errors.js";
 import { shapeMention, toResult } from "../src/shape.js";
-import { pickDefined, requiresSignature, stripHandle } from "../src/tools/util.js";
+import { pickDefined, stripHandle } from "../src/tools/util.js";
 
 describe("config", () => {
   it("defaults to stdio", () => {
@@ -48,8 +48,7 @@ describe("errors", () => {
   });
 
   it("names the variable that is missing", () => {
-    expect(missingCredential("apiKey")).toContain("ELFA_API_KEY");
-    expect(missingCredential("hmacSecret")).toContain("ELFA_HMAC_SECRET");
+    expect(missingCredential()).toContain("ELFA_API_KEY");
   });
 });
 
@@ -110,71 +109,6 @@ describe("shape", () => {
 });
 
 describe("util", () => {
-  it("lets notification-only queries through unsigned", () => {
-    for (const type of ["notify", "telegram_bot", "webhook"]) {
-      expect(requiresSignature({ actions: [{ stepId: "s", type, params: {} }] }), type).toBe(
-        false,
-      );
-    }
-  });
-
-  it("requires a signature for order actions", () => {
-    for (const type of ["market_order", "limit_order"]) {
-      expect(requiresSignature({ actions: [{ stepId: "s", type, params: {} }] }), type).toBe(
-        true,
-      );
-    }
-  });
-
-  it("whitelists rather than blacklists", () => {
-    expect(requiresSignature({ actions: [{ stepId: "s", params: {} }] })).toBe(true);
-    expect(requiresSignature({ actions: [{ stepId: "s", type: "future_type" }] })).toBe(true);
-    expect(requiresSignature({ actions: [] })).toBe(true);
-    expect(requiresSignature({})).toBe(true);
-    expect(requiresSignature(null)).toBe(true);
-  });
-
-  it("allows an llm action only when its callback is a notification", () => {
-    expect(
-      requiresSignature({
-        actions: [
-          {
-            stepId: "s",
-            type: "llm",
-            params: { callback: { action: { type: "notify" } } },
-          },
-        ],
-      }),
-    ).toBe(false);
-
-    expect(
-      requiresSignature({
-        actions: [
-          {
-            stepId: "s",
-            type: "llm",
-            params: { callback: { action: { type: "market_order" } } },
-          },
-        ],
-      }),
-    ).toBe(true);
-
-    expect(
-      requiresSignature({ actions: [{ stepId: "s", type: "llm", params: {} }] }),
-    ).toBe(true);
-  });
-
-  it("requires a signature when any single action is not a notification", () => {
-    expect(
-      requiresSignature({
-        actions: [
-          { stepId: "a", type: "notify", params: {} },
-          { stepId: "b", type: "market_order", params: {} },
-        ],
-      }),
-    ).toBe(true);
-  });
-
   it("drops undefined values", () => {
     expect(pickDefined({ a: 1, b: undefined, c: null })).toEqual({ a: 1, c: null });
   });
