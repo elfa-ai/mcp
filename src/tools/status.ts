@@ -21,7 +21,6 @@ const REPORTED = [
   "depositCredits",
   "spendCapCredits",
   "athenaEnabled",
-  "hmacEnabled",
   "scopes",
 ] as const;
 

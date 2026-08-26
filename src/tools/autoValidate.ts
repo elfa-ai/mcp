@@ -5,7 +5,7 @@ import type { Deps } from "../client.js";
 import { asArray } from "../shape.js";
 import { eqlQueryArg, fail, pickDefined, run } from "./util.js";
 
-const EXCHANGES = ["hyperliquid", "gmx", "binance", "pacifica"] as const;
+const EXCHANGES = ["hyperliquid", "gmx", "binance"] as const;
 
 export function registerAutoValidate(server: McpServer, deps: Deps): void {
   server.registerTool(
