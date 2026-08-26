@@ -1,5 +1,26 @@
 # Changelog
 
+## 4.0.0
+
+### Removed
+
+- **`ELFA_HMAC_SECRET` and request signing are gone.** Elfa no longer documents HMAC signing for `/v2/auto/*` — the API key alone authenticates every route, including mutations. Removed here: the `ELFA_HMAC_SECRET` environment variable, the `x-elfa-hmac-secret` request header on the HTTP transport, the `elfa_hmac_secret` field in the Claude Desktop bundle, and the registry entry in `server.json`.
+
+  **Migration:** unset `ELFA_HMAC_SECRET` and stop sending `x-elfa-hmac-secret`. Neither is read any more. Nothing replaces them.
+
+- **The client-side signing gate is gone.** `auto_query_write` and `auto_draft` no longer inspect a query's action shape and pre-reject it before sending. Every action type Elfa documents for API-key Auto — `notify`, `telegram_bot`, `webhook`, `llm` — is accepted with the API key alone, so the gate could only produce false rejections.
+
+- **`hmacEnabled` is no longer reported by `api_status`.** The field was removed from the key-status response, so surfacing it would report something the API no longer sends.
+
+- **`pacifica` is no longer a valid `auto_validate` exchange.** The documented enum for `method=symbol` is now `hyperliquid`, `gmx`, `binance`.
+
+### Changed
+
+- **Spec refreshed to `2.6.3`** from `2.5.0`. A credit is now $0.0145, so the x402 reference prices move to $0.0145 (1 credit), $0.0725 (5 credits) and $0.261 (18 credits). Accounts already on PAYG keep $0.009 per credit until 28 September 2026, 16:00 UTC.
+- **`getMarketEvents-v2` is recorded as deliberately unexposed.** It is limited to select Enterprise customers and the published operation takes no parameters, so there is no usable tool surface. Eleven tools, unchanged.
+- Install troubleshooting no longer claims a `403` on an Auto call means Auto is not enabled in the portal. There is no separate Auto enablement step; a new API key can call `/v2/auto/*` immediately.
+- `SECURITY.md` now states that the API key is read from the environment on stdio and can arrive per request as `x-elfa-api-key` over HTTP, and refers to the tools by their current names.
+
 ## 3.0.0
 
 ### Removed
