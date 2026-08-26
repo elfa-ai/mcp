@@ -2,8 +2,7 @@ import { z } from "zod";
 import type { EqlQuery } from "@elfa-ai/sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
-import { missingCredential } from "../errors.js";
-import { eqlQueryArg, fail, requiresSignature, pickDefined, run } from "./util.js";
+import { eqlQueryArg, fail, pickDefined, run } from "./util.js";
 
 export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
   server.registerTool(
@@ -11,7 +10,7 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
     {
       title: "Write Auto queries",
       description:
-        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again, so validate it with auto_validate and confirm the cost and the action with the user before calling this. Queries whose action is not a plain notification also need request signing.",
+        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again, so validate it with auto_validate and confirm the cost and the action with the user before calling this.",
       inputSchema: {
         method: z
           .enum(["create", "cancel", "delete"])
@@ -49,9 +48,6 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
       if (args.method === "create") {
         if (!args.query) {
           return fail("method=create needs a query. Build one with auto_build.");
-        }
-        if (requiresSignature(args.query) && !deps.hasHmac) {
-          return fail(missingCredential("hmacSecret"));
         }
       } else if (!args.queryId) {
         return fail(`method=${args.method} needs queryId. Find one with auto_query.`);

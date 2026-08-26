@@ -87,35 +87,3 @@ export function pickDefined<T extends Record<string, unknown>>(
   }
   return out;
 }
-
-const NOTIFICATION_ACTIONS = new Set(["notify", "telegram_bot", "webhook"]);
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-function isNotificationAction(action: unknown): boolean {
-  if (!isRecord(action)) return false;
-  if (typeof action.type !== "string") return false;
-  if (NOTIFICATION_ACTIONS.has(action.type)) return true;
-
-  if (action.type === "llm") {
-    if (!isRecord(action.params)) return false;
-    if (!isRecord(action.params.callback)) return false;
-    const callbackAction = action.params.callback.action;
-    if (!isRecord(callbackAction)) return false;
-    return (
-      typeof callbackAction.type === "string" &&
-      NOTIFICATION_ACTIONS.has(callbackAction.type)
-    );
-  }
-
-  return false;
-}
-
-export function requiresSignature(query: unknown): boolean {
-  if (!isRecord(query)) return true;
-  const actions = query.actions;
-  if (!Array.isArray(actions) || actions.length === 0) return true;
-  return !actions.every(isNotificationAction);
-}

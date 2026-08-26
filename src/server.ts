@@ -20,7 +20,7 @@ const INSTRUCTIONS = `Elfa gives you crypto social intelligence plus Auto, a con
 
 Start cheap. trending, mentions and account_stats cost 1 credit. narratives costs 5 and market_chat costs more, so reach for them only when metrics are not enough. If a call fails on auth or credits, check api_status.
 
-Auto is a three step flow: auto_build drafts EQL from plain language, auto_validate checks it and returns the cost, auto_query_write activates it. Never activate without showing the user the estimated cost and the action that will fire. Some Auto mutations need ELFA_HMAC_SECRET set; notification-only ones do not.
+Auto is a three step flow: auto_build drafts EQL from plain language, auto_validate checks it and returns the cost, auto_query_write activates it. Never activate without showing the user the estimated cost and the action that will fire.
 
 Auto has no push channel here. Poll auto_query with method=get and wait for pollAfterSeconds between calls.
 

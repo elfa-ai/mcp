@@ -6,11 +6,9 @@ Open an [issue](https://github.com/elfa-ai/mcp/issues), or email [support@elfa.a
 
 ## Credentials
 
-Both values are issued by the developer portal. The HMAC secret is shown once and can be rotated; rotating it breaks any client still signing with the old one.
+`ELFA_API_KEY` is issued by the developer portal. On stdio it is read from the environment; over HTTP it can also arrive per request as an `x-elfa-api-key` header, which takes precedence over the environment. It is never accepted as a tool argument, so it does not end up in model context or client transcripts. It is never logged.
 
-`ELFA_API_KEY` and `ELFA_HMAC_SECRET` are read from the environment only. They are never accepted as tool arguments, so they do not end up in model context or client transcripts. Neither value is logged.
-
-Client config files that hold these values are plain text. Keep them out of version control.
+Client config files that hold this value are plain text. Keep them out of version control.
 
 ## Untrusted content
 
@@ -20,9 +18,7 @@ The server marks that content as untrusted in every response and instructs the m
 
 ## Actions that spend money
 
-`elfa_auto_query_write` and `elfa_auto_draft` are annotated as write tools so clients prompt before running them. An activated Auto query fires its action unattended, without a further prompt.
-
-Auto mutations that are not plain notifications require `ELFA_HMAC_SECRET`. Leaving it unset removes that capability entirely and is the right default for anything untrusted or shared.
+`auto_query_write` and `auto_draft` are annotated as write tools so clients prompt before running them. An activated Auto query fires its action unattended, without a further prompt.
 
 ## Remote deployments
 
@@ -30,4 +26,4 @@ The HTTP transport is stateless and holds no credentials between requests. When 
 
 - terminate TLS in front of it
 - set `ELFA_MCP_ALLOWED_ORIGINS`
-- do not set `ELFA_API_KEY` or `ELFA_HMAC_SECRET` on a multi-tenant deployment, require them per request instead
+- do not set `ELFA_API_KEY` on a multi-tenant deployment, require it per request instead
