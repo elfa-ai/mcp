@@ -9,7 +9,7 @@ export function registerAccountStats(server: McpServer, deps: Deps): void {
     {
       title: "Account stats",
       description:
-        "Smart follower and engagement stats for an X account. 1 credit per call. Use it to judge whether an account's reach is real before weighting what it posts.",
+        "Smart follower and engagement stats for an X account. 1 credit per call. Use it to judge whether an account's reach is real before weighting what it posts. Returns raw metrics, not a reputation score, so the signal is in the ratios. Legacy: scheduled for removal on 28 October 2026 and not being extended. Build new work on mentions, which carries account context on every result.",
       inputSchema: {
         username: z.string().describe("X username, with or without the @."),
       },
