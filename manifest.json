@@ -76,7 +76,7 @@
     {
       "name": "account_stats",
       "title": "Account stats",
-      "summary": "Smart follower and engagement stats for an X account. Legacy, scheduled for removal on 28 October 2026.",
+      "summary": "Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026.",
       "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
