@@ -94,7 +94,7 @@ If a call fails, `api_status` reports whether the key is valid and how many cred
 | --- | --- |
 | Server does not appear | Node is older than 20, or the client was not restarted |
 | Authentication failed | `ELFA_API_KEY` is missing, wrong, or expired |
-| Out of credits | The plan's monthly credits are used up |
+| Out of credits | The plan's monthly credits are used up, or the prepaid balance is spent |
 | Forbidden on an Auto call | The key is not permitted to perform that Auto operation |
 
 Claude Desktop logs are in `~/Library/Logs/Claude/mcp*.log` on macOS and `%APPDATA%\Claude\logs\mcp*.log` on Windows.

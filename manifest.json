@@ -26,7 +26,7 @@
     {
       "name": "mentions",
       "title": "Mentions",
-      "summary": "Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed.",
+      "summary": "Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets.",
       "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
@@ -76,7 +76,7 @@
     {
       "name": "account_stats",
       "title": "Account stats",
-      "summary": "Smart follower and engagement stats for an X account.",
+      "summary": "Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026.",
       "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,

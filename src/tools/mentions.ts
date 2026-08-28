@@ -21,7 +21,7 @@ export function registerMentions(server: McpServer, deps: Deps): void {
     {
       title: "Mentions",
       description:
-        "Social mentions from X and Telegram. 1 credit per call. Returns engagement metrics and a link per post, not the post text. mode=top ranks one ticker's mentions by engagement. mode=search filters by keywords or by account. mode=news returns the token news feed.",
+        "Social mentions from X and Telegram. 1 credit per call. Returns engagement metrics and a link per post, not the post text. mode=top ranks one ticker's mentions by engagement. mode=search filters by keywords or by account. mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets.",
       inputSchema: {
         mode: z
           .enum(["top", "search", "news"])
