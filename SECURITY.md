@@ -25,5 +25,21 @@ The server marks that content as untrusted in every response and instructs the m
 The HTTP transport is stateless and holds no credentials between requests. When exposing it:
 
 - terminate TLS in front of it
+- set `ELFA_MCP_ALLOWED_HOSTS` to the domains it answers on
 - set `ELFA_MCP_ALLOWED_ORIGINS`
 - do not set `ELFA_API_KEY` on a multi-tenant deployment, require it per request instead
+
+### DNS rebinding
+
+The transport enables the SDK's DNS rebinding protection and defaults its host
+allowlist to the loopback names it binds, so a local run is closed without
+configuration. This matters most for a local run, not a hosted one: an
+attacker's page can re-point its own hostname at `127.0.0.1` and the browser
+then treats the server as same origin, reaching every tool at the privilege of
+whatever key the process holds.
+
+Binding to `127.0.0.1` is not a mitigation, because the victim's browser is
+already on loopback. An origin allowlist is not one either, because the rebound
+request is same origin and carries no `Origin` header. The `Host` header is the
+control that works, which is why `ELFA_MCP_ALLOWED_HOSTS` must be set for any
+deployment that answers on something other than the loopback names it binds.

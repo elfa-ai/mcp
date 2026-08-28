@@ -74,13 +74,20 @@ For a hosted deployment, run the same package over Streamable HTTP:
 ```bash
 ELFA_MCP_TRANSPORT=http \
 ELFA_MCP_PORT=3000 \
+ELFA_MCP_ALLOWED_HOSTS=mcp.your-domain.example \
 ELFA_MCP_ALLOWED_ORIGINS=https://your-client.example \
 npx -y @elfa-ai/mcp
 ```
 
 The endpoint is `POST /mcp`. It is stateless, so it scales horizontally without sticky sessions. Clients send `x-elfa-api-key`. `GET /healthz` is a liveness probe.
 
-Put it behind TLS and set `ELFA_MCP_ALLOWED_ORIGINS` before exposing it.
+Put it behind TLS before exposing it.
+
+`ELFA_MCP_ALLOWED_HOSTS` is required here. DNS rebinding protection is on by
+default and the host allowlist defaults to the loopback names the server binds,
+so a hosted deployment that answers on its own domain rejects every request with
+403 until that domain is listed. Set `ELFA_MCP_ALLOWED_ORIGINS` too when
+browsers call the endpoint directly.
 
 ## Verifying
 

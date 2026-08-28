@@ -21,6 +21,24 @@ function jsonRpcError(res: Response, status: number, message: string): void {
   });
 }
 
+/**
+ * Hosts accepted when ELFA_MCP_ALLOWED_HOSTS is unset.
+ *
+ * DNS rebinding works by pointing an attacker-controlled hostname at the
+ * loopback address, so the Host header is the only header that still carries
+ * that hostname. Defaulting to the loopback names we actually bind keeps the
+ * documented local run closed. Hosted deployments terminate on a public
+ * domain and must set ELFA_MCP_ALLOWED_HOSTS.
+ */
+function defaultAllowedHosts(config: ServerConfig): string[] {
+  const hosts = new Set<string>();
+  for (const name of [config.host, "localhost", "127.0.0.1", "[::1]"]) {
+    hosts.add(`${name}:${config.port}`);
+    if (config.port === 80) hosts.add(name);
+  }
+  return [...hosts];
+}
+
 export function createHttpApp(config: ServerConfig): express.Express {
   const app = express();
   app.disable("x-powered-by");
@@ -65,8 +83,13 @@ export function createHttpApp(config: ServerConfig): express.Express {
 
       server = createServer(deps);
       transport = new StreamableHTTPServerTransport({
+        enableDnsRebindingProtection: true,
+        allowedHosts:
+          config.allowedHosts.length > 0
+            ? config.allowedHosts
+            : defaultAllowedHosts(config),
         ...(config.allowedOrigins.length > 0
-          ? { allowedOrigins: config.allowedOrigins, enableDnsRebindingProtection: true }
+          ? { allowedOrigins: config.allowedOrigins }
           : {}),
       });
 
