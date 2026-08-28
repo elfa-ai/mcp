@@ -5,6 +5,7 @@ export interface ServerConfig {
   port: number;
   host: string;
   allowedOrigins: string[];
+  allowedHosts: string[];
   apiKey: string | undefined;
   baseUrl: string | undefined;
   extraHeaders: Record<string, string> | undefined;
@@ -69,6 +70,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     port: num(env.ELFA_MCP_PORT, DEFAULT_PORT),
     host: env.ELFA_MCP_HOST || DEFAULT_HOST,
     allowedOrigins: list(env.ELFA_MCP_ALLOWED_ORIGINS),
+    allowedHosts: list(env.ELFA_MCP_ALLOWED_HOSTS),
     apiKey: env.ELFA_API_KEY || undefined,
     baseUrl: env.ELFA_BASE_URL || undefined,
     extraHeaders: headers(env.ELFA_EXTRA_HEADERS),

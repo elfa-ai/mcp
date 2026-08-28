@@ -1,5 +1,27 @@
 # Changelog
 
+## 4.1.0
+
+### Security
+
+- **DNS rebinding protection is now armed by default on the HTTP transport.** `enableDnsRebindingProtection` was only passed when `ELFA_MCP_ALLOWED_ORIGINS` was set, and that variable is unset in the documented local run (`ELFA_MCP_TRANSPORT=http npx -y @elfa-ai/mcp`), so the control shipped present but disarmed. The transport accepted any `Host` and any `Origin` while holding `ELFA_API_KEY`, which let a page the user visits re-point its own hostname at `127.0.0.1` and reach `tools/list` and `tools/call` at that process's own privilege — including the `auto_*` tools that spend credits. Binding to `127.0.0.1` was never a mitigation, because the victim's browser is already on loopback.
+
+  Setting the origin allowlist did not close it either. `allowedOrigins` was passed but `allowedHosts` never was, and the SDK guards each check with its own `length > 0` test, so `Host` validation never ran. An origin allowlist cannot carry this alone: a rebound request is same-origin and sends no `Origin` header, which leaves `Host` as the only header still naming the attacker's domain.
+
+  Refs GHSA-w48q-cv73-mx4w / CVE-2025-66414. Reported by mcpdone.
+
+### Added
+
+- **`ELFA_MCP_ALLOWED_HOSTS`**, a comma separated `Host` allowlist. It defaults to the loopback names the server binds — `ELFA_MCP_HOST:PORT`, `localhost:PORT` and `127.0.0.1:PORT` — so the documented local run is closed with no configuration.
+
+### Changed
+
+- **Action required for hosted deployments.** The host allowlist fails closed, so a deployment answering on any `Host` other than the loopback names the server binds now returns `403` until it sets `ELFA_MCP_ALLOWED_HOSTS`. That covers a public domain, a reverse proxy, and a container that maps the port to a different one than the server binds, since the default is derived from `ELFA_MCP_PORT`.
+
+  A minor rather than a major, because nothing about the interaction with this server changes: the eleven tools, their arguments, the stdio transport and every client-facing contract are untouched. A self-hosted HTTP deployment needs one environment variable.
+
+  **Migration:** set `ELFA_MCP_ALLOWED_HOSTS` to the host values the deployment serves, for example `ELFA_MCP_ALLOWED_HOSTS=mcp.example.com`. The stdio transport is unaffected and needs no change.
+
 ## 4.0.0
 
 ### Removed

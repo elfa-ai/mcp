@@ -123,7 +123,25 @@ The same server runs over Streamable HTTP for hosted deployments:
 ELFA_MCP_TRANSPORT=http ELFA_MCP_PORT=3000 npx -y @elfa-ai/mcp
 ```
 
-It is stateless — no sessions, one server instance per request, safe behind a load balancer. Credentials come from the `x-elfa-api-key` request header, falling back to the environment. Set `ELFA_MCP_ALLOWED_ORIGINS` to a comma separated allowlist when exposing it publicly.
+It is stateless — no sessions, one server instance per request, safe behind a load balancer. Credentials come from the `x-elfa-api-key` request header, falling back to the environment.
+
+DNS rebinding protection is on by default. The server accepts only the loopback names it binds — `localhost:PORT` and `127.0.0.1:PORT` — which covers the local run above and nothing else. Any deployment that answers on a different `Host` must list the values it serves:
+
+```bash
+ELFA_MCP_ALLOWED_HOSTS=mcp.example.com
+```
+
+That includes a public domain, a reverse proxy, and a container that maps the port to a different one than the server binds. A `Host` the list does not cover is rejected with 403.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `ELFA_MCP_TRANSPORT` | no | `http` to serve over Streamable HTTP, default `stdio` |
+| `ELFA_MCP_HOST` | no | Bind address, default `127.0.0.1` |
+| `ELFA_MCP_PORT` | no | Bind port, default `3000` |
+| `ELFA_MCP_ALLOWED_HOSTS` | no | Comma separated `Host` allowlist, defaults to the loopback names bound |
+| `ELFA_MCP_ALLOWED_ORIGINS` | no | Comma separated `Origin` allowlist |
+
+Set `ELFA_MCP_ALLOWED_ORIGINS` as well when browsers call the server directly. It complements the host allowlist rather than replacing it: a rebound request is same origin, so it carries no `Origin` header for that list to check, and the `Host` header is the only one still naming the attacker's domain.
 
 ## Safety
 

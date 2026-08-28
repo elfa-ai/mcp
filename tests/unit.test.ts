@@ -25,6 +25,14 @@ describe("config", () => {
         .allowedOrigins,
     ).toEqual(["https://a.example", "https://b.example"]);
   });
+
+  it("splits the host allowlist and defaults it empty", () => {
+    expect(loadConfig({}).allowedHosts).toEqual([]);
+    expect(
+      loadConfig({ ELFA_MCP_ALLOWED_HOSTS: "mcp.elfa.ai, mcp.internal:8080" })
+        .allowedHosts,
+    ).toEqual(["mcp.elfa.ai", "mcp.internal:8080"]);
+  });
 });
 
 describe("errors", () => {
