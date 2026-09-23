@@ -3,6 +3,7 @@ import { buildDeps, CredentialError } from "./client.js";
 import { loadConfig } from "./config.js";
 import { createHttpApp } from "./http.js";
 import { createServer } from "./server.js";
+import { fetchEntitlements } from "./entitlements.js";
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -18,7 +19,8 @@ async function main(): Promise<void> {
   }
 
   const deps = buildDeps(config);
-  const server = createServer(deps);
+  // Read once: a stdio server runs as one key for its whole life.
+  const server = createServer(deps, await fetchEntitlements(deps));
   await server.connect(new StdioServerTransport());
 }
 

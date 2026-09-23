@@ -1,10 +1,10 @@
 import { z } from "zod";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { McpServer, RegisteredTool } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
 import { fail, pickDefined, run, stripHandle } from "./util.js";
 
-export function registerChat(server: McpServer, deps: Deps): void {
-  server.registerTool(
+export function registerChat(server: McpServer, deps: Deps): RegisteredTool {
+  return server.registerTool(
     "market_chat",
     {
       title: "Market chat",

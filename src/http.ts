@@ -6,6 +6,12 @@ import { buildDeps, CredentialError } from "./client.js";
 import type { ServerConfig } from "./config.js";
 import { createServer } from "./server.js";
 import {
+  EntitlementCache,
+  fetchEntitlements,
+  type Entitlements,
+} from "./entitlements.js";
+import type { Deps } from "./client.js";
+import {
   bearerChallenge,
   bearerToken,
   IntrospectionUnavailableError,
@@ -50,6 +56,8 @@ function defaultAllowedHosts(config: ServerConfig): string[] {
 export interface HttpAppOptions {
   /** Injected in tests; built from config.oauth otherwise. */
   verifier?: TokenVerifier;
+  /** Injected in tests; reads `/v2/key-status` otherwise. */
+  entitlements?: (deps: Deps) => Promise<Entitlements | undefined>;
 }
 
 export function createHttpApp(
@@ -60,6 +68,8 @@ export function createHttpApp(
   const oauth = config.oauth;
   const verifier =
     options.verifier ?? (oauth ? new TokenVerifier(oauth) : undefined);
+  const loadEntitlements = options.entitlements ?? fetchEntitlements;
+  const entitlementCache = new EntitlementCache();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "4mb" }));
   app.use(
@@ -158,7 +168,11 @@ export function createHttpApp(
       if (apiKey === undefined) return;
       const deps = buildDeps(config, { apiKey: apiKey ?? undefined });
 
-      server = createServer(deps);
+      const entitlements = apiKey
+        ? await entitlementCache.get(apiKey, () => loadEntitlements(deps))
+        : undefined;
+
+      server = createServer(deps, entitlements);
       transport = new StreamableHTTPServerTransport({
         enableDnsRebindingProtection: true,
         allowedHosts:
