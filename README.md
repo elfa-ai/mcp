@@ -79,7 +79,6 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 
 Not exposed as tools:
 
-- `getMarketEvents-v2` — Available only to select Enterprise customers, and the published operation takes no parameters. Contact sales@elfa.ai for access.
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.

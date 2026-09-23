@@ -15,6 +15,7 @@
 
 ### Changed
 
+- `getMarketEvents-v2` is no longer listed as unexposed. The Elfa API dropped it from the published spec, so there is nothing left to account for.
 - In OAuth mode `ELFA_API_KEY` is ignored. Every request brings its own credential, and an environment key would otherwise be handed to any caller that sends none. API-key mode keeps its environment fallback.
 
 ## 4.1.0
