@@ -149,7 +149,7 @@ async function listen(verifier: TokenVerifier): Promise<number> {
   const port = (probe.address() as AddressInfo).port;
   await new Promise<void>((resolve) => probe.close(() => resolve()));
   const config = loadConfig({ ...OAUTH_ENV, ELFA_MCP_PORT: String(port) });
-  server = http.createServer(createHttpApp(config, { verifier }));
+  server = http.createServer(createHttpApp(config, { verifier, entitlements: async () => undefined }));
   await new Promise<void>((resolve) => server!.listen(port, "127.0.0.1", resolve));
   return port;
 }

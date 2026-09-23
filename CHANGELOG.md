@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.3.0
+
+### Changed
+
+- **Plan-gated tools say so up front.** The server reads the key's scopes from `/v2/key-status`: once at startup on stdio, and per request on HTTP, cached for a minute per key. When the plan doesn't include a tool (today only `market_chat`, which needs Grow, Scale or Pay-as-you-go), the tool stays listed, but its description names the plans that include it. Calling it returns the upgrade link at once, with no API call and no credits spent. Before, the agent found out only by spending a call on a permission error.
+- If the scopes can't be read within 3 seconds, nothing is locked and the API still enforces access.
+
 ## 4.2.0
 
 ### Added

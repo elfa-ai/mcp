@@ -43,7 +43,7 @@ async function listen(env: NodeJS.ProcessEnv): Promise<number> {
     ELFA_MCP_PORT: String(port),
     ...env,
   });
-  const app = createHttpApp(config);
+  const app = createHttpApp(config, { entitlements: async () => undefined });
   server = http.createServer(app);
   await new Promise<void>((resolve) => server!.listen(port, "127.0.0.1", resolve));
   return port;
