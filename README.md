@@ -79,7 +79,6 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 
 Not exposed as tools:
 
-- `getMarketEvents-v2` — Available only to select Enterprise customers, and the published operation takes no parameters. Contact sales@elfa.ai for access.
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
@@ -123,7 +122,7 @@ The same server runs over Streamable HTTP for hosted deployments:
 ELFA_MCP_TRANSPORT=http ELFA_MCP_PORT=3000 npx -y @elfa-ai/mcp
 ```
 
-It is stateless — no sessions, one server instance per request, safe behind a load balancer. Credentials come from the `x-elfa-api-key` request header, falling back to the environment.
+It is stateless — no sessions, one server instance per request, safe behind a load balancer. Credentials come from the `x-elfa-api-key` request header, falling back to the environment, or from an OAuth sign-in (see below).
 
 DNS rebinding protection is on by default. The server accepts only the loopback names it binds — `localhost:PORT` and `127.0.0.1:PORT` — which covers the local run above and nothing else. Any deployment that answers on a different `Host` must list the values it serves:
 
@@ -142,6 +141,42 @@ That includes a public domain, a reverse proxy, and a container that maps the po
 | `ELFA_MCP_ALLOWED_ORIGINS` | no | Comma separated `Origin` allowlist |
 
 Set `ELFA_MCP_ALLOWED_ORIGINS` as well when browsers call the server directly. It complements the host allowlist rather than replacing it: a rebound request is same origin, so it carries no `Origin` header for that list to check, and the `Host` header is the only one still naming the attacker's domain.
+
+### OAuth sign-in
+
+A hosted server can let clients sign in through a browser instead of sending an API key. Set `ELFA_MCP_AUTH=oauth` and the server becomes an OAuth resource server under the MCP authorization spec:
+
+1. A request with no credential gets `401` and a `WWW-Authenticate` challenge.
+2. The challenge points the client to the protected-resource metadata at `/.well-known/oauth-protected-resource/mcp`.
+3. That metadata names the authorization server, where the user signs in.
+4. The client then sends `Authorization: Bearer <token>`.
+5. The server checks the token against the authorization server's introspection endpoint. The endpoint answers with the Elfa API key the request runs as, so the token never reaches the Elfa API.
+
+```bash
+ELFA_MCP_TRANSPORT=http \
+ELFA_MCP_AUTH=oauth \
+ELFA_MCP_RESOURCE_URL=https://mcp.example.com/mcp \
+ELFA_OAUTH_ISSUER=https://auth.example.com \
+ELFA_OAUTH_INTROSPECTION_URL=https://auth.example.com/introspect \
+ELFA_OAUTH_INTROSPECTION_TOKEN=... \
+ELFA_MCP_ALLOWED_HOSTS=mcp.example.com \
+npx -y @elfa-ai/mcp
+```
+
+| Variable | Required in OAuth mode | Purpose |
+| --- | --- | --- |
+| `ELFA_MCP_AUTH` | yes | `oauth` to enable, default `apikey` |
+| `ELFA_MCP_RESOURCE_URL` | yes | Canonical URL of this endpoint. Tokens must be issued for exactly this value |
+| `ELFA_OAUTH_ISSUER` | yes | Authorization server listed in the metadata |
+| `ELFA_OAUTH_INTROSPECTION_URL` | yes | Where tokens are checked |
+| `ELFA_OAUTH_INTROSPECTION_TOKEN` | yes | Bearer sent to the introspection endpoint |
+| `ELFA_OAUTH_SCOPES` | no | Comma separated scopes to advertise, default `elfa` |
+
+Notes:
+
+- An `x-elfa-api-key` header still works in OAuth mode.
+- `ELFA_API_KEY` is ignored in OAuth mode, so a caller with no credential never runs as the server's own key.
+- Valid tokens are cached for up to a minute, which bounds how long a revoked token keeps working.
 
 ## Safety
 

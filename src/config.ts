@@ -1,4 +1,21 @@
 export type TransportMode = "stdio" | "http";
+export type AuthMode = "apikey" | "oauth";
+
+/**
+ * OAuth resource-server settings (HTTP transport only). The server never
+ * issues tokens: it points clients at the authorization server, then checks
+ * each bearer token against that server's introspection endpoint, which
+ * answers with the API key the request should run as.
+ */
+export interface OAuthConfig {
+  /** Canonical URL of this MCP endpoint, e.g. https://mcp.elfa.ai/mcp. */
+  resource: string;
+  /** Authorization server issuer, listed in the protected-resource metadata. */
+  issuer: string;
+  introspectionUrl: string;
+  introspectionToken: string;
+  scopes: string[];
+}
 
 export interface ServerConfig {
   transport: TransportMode;
@@ -12,6 +29,8 @@ export interface ServerConfig {
   timeout: number;
   retries: number;
   maxResponseChars: number;
+  auth: AuthMode;
+  oauth: OAuthConfig | undefined;
 }
 
 const DEFAULT_PORT = 3000;
@@ -61,9 +80,39 @@ function list(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+export class ConfigError extends Error {}
+
+function oauthConfig(env: NodeJS.ProcessEnv): OAuthConfig {
+  const required = {
+    ELFA_MCP_RESOURCE_URL: env.ELFA_MCP_RESOURCE_URL,
+    ELFA_OAUTH_ISSUER: env.ELFA_OAUTH_ISSUER,
+    ELFA_OAUTH_INTROSPECTION_URL: env.ELFA_OAUTH_INTROSPECTION_URL,
+    ELFA_OAUTH_INTROSPECTION_TOKEN: env.ELFA_OAUTH_INTROSPECTION_TOKEN,
+  };
+  const missing = Object.entries(required)
+    .filter(([, value]) => !value)
+    .map(([name]) => name);
+  if (missing.length > 0) {
+    throw new ConfigError(
+      `ELFA_MCP_AUTH=oauth requires ${missing.join(", ")}.`,
+    );
+  }
+  return {
+    resource: required.ELFA_MCP_RESOURCE_URL!,
+    issuer: required.ELFA_OAUTH_ISSUER!,
+    introspectionUrl: required.ELFA_OAUTH_INTROSPECTION_URL!,
+    introspectionToken: required.ELFA_OAUTH_INTROSPECTION_TOKEN!,
+    scopes: list(env.ELFA_OAUTH_SCOPES).length > 0 ? list(env.ELFA_OAUTH_SCOPES) : ["elfa"],
+  };
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const transport: TransportMode =
     env.ELFA_MCP_TRANSPORT === "http" ? "http" : "stdio";
+  const auth: AuthMode = env.ELFA_MCP_AUTH === "oauth" ? "oauth" : "apikey";
+  if (auth === "oauth" && transport !== "http") {
+    throw new ConfigError("ELFA_MCP_AUTH=oauth needs ELFA_MCP_TRANSPORT=http.");
+  }
 
   return {
     transport,
@@ -71,7 +120,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     host: env.ELFA_MCP_HOST || DEFAULT_HOST,
     allowedOrigins: list(env.ELFA_MCP_ALLOWED_ORIGINS),
     allowedHosts: list(env.ELFA_MCP_ALLOWED_HOSTS),
-    apiKey: env.ELFA_API_KEY || undefined,
+    // In oauth mode every request brings its own credential. An environment
+    // key would be handed to any caller that sends none, so it is ignored.
+    apiKey: auth === "oauth" ? undefined : env.ELFA_API_KEY || undefined,
     baseUrl: env.ELFA_BASE_URL || undefined,
     extraHeaders: headers(env.ELFA_EXTRA_HEADERS),
     timeout: num(env.ELFA_TIMEOUT, DEFAULT_TIMEOUT),
@@ -80,5 +131,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
       env.ELFA_MCP_MAX_RESPONSE_CHARS,
       DEFAULT_MAX_RESPONSE_CHARS,
     ),
+    auth,
+    oauth: auth === "oauth" ? oauthConfig(env) : undefined,
   };
 }
