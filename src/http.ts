@@ -5,6 +5,14 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { buildDeps, CredentialError } from "./client.js";
 import type { ServerConfig } from "./config.js";
 import { createServer } from "./server.js";
+import {
+  bearerChallenge,
+  bearerToken,
+  IntrospectionUnavailableError,
+  protectedResourceMetadata,
+  protectedResourceMetadataPath,
+  TokenVerifier,
+} from "./oauth.js";
 
 const MCP_PATH = "/mcp";
 
@@ -39,8 +47,19 @@ function defaultAllowedHosts(config: ServerConfig): string[] {
   return [...hosts];
 }
 
-export function createHttpApp(config: ServerConfig): express.Express {
+export interface HttpAppOptions {
+  /** Injected in tests; built from config.oauth otherwise. */
+  verifier?: TokenVerifier;
+}
+
+export function createHttpApp(
+  config: ServerConfig,
+  options: HttpAppOptions = {},
+): express.Express {
   const app = express();
+  const oauth = config.oauth;
+  const verifier =
+    options.verifier ?? (oauth ? new TokenVerifier(oauth) : undefined);
   app.disable("x-powered-by");
   app.use(express.json({ limit: "4mb" }));
   app.use(
@@ -62,6 +81,64 @@ export function createHttpApp(config: ServerConfig): express.Express {
     res.json({ ok: true });
   });
 
+  if (oauth) {
+    // RFC 9728 metadata: where to get a token for this server. Served at the
+    // path-suffixed location and at the root, which older clients probe.
+    const sendMetadata = (_req: Request, res: Response) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Cache-Control", "public, max-age=300");
+      res.json(protectedResourceMetadata(oauth));
+    };
+    const metadataPath = protectedResourceMetadataPath(oauth.resource);
+    app.get(metadataPath, sendMetadata);
+    if (metadataPath !== "/.well-known/oauth-protected-resource") {
+      app.get("/.well-known/oauth-protected-resource", sendMetadata);
+    }
+  }
+
+  /**
+   * The API key a request runs as. A request header wins, so API-key users of
+   * a hosted server are unaffected by OAuth. In oauth mode a bearer token is
+   * exchanged for its key by introspection; a request with neither gets the
+   * challenge that starts the client's sign-in. Returns undefined when it has
+   * already answered the request.
+   */
+  async function resolveApiKey(
+    req: Request,
+    res: Response,
+  ): Promise<string | undefined | null> {
+    const headerKey = header(req, "x-elfa-api-key");
+    if (headerKey || !oauth || !verifier) return headerKey ?? null;
+
+    const token = bearerToken(header(req, "authorization"));
+    if (!token) {
+      res.setHeader("WWW-Authenticate", bearerChallenge(oauth));
+      jsonRpcError(res, 401, "Authorization required. Sign in to Elfa to use this server.");
+      return undefined;
+    }
+    try {
+      const verified = await verifier.verify(token);
+      if (verified) return verified.apiKey;
+    } catch (error) {
+      if (error instanceof IntrospectionUnavailableError) {
+        // Not a 401: that would send the client to sign in again for what is
+        // an outage on our side.
+        jsonRpcError(res, 503, "Authorization service unavailable, try again shortly.");
+        return undefined;
+      }
+      throw error;
+    }
+    res.setHeader(
+      "WWW-Authenticate",
+      bearerChallenge(oauth, {
+        code: "invalid_token",
+        description: "The access token is invalid or expired",
+      }),
+    );
+    jsonRpcError(res, 401, "Invalid or expired access token.");
+    return undefined;
+  }
+
   app.post(MCP_PATH, async (req: Request, res: Response) => {
     const origin = header(req, "origin");
     if (
@@ -77,9 +154,9 @@ export function createHttpApp(config: ServerConfig): express.Express {
     let transport: StreamableHTTPServerTransport | undefined;
 
     try {
-      const deps = buildDeps(config, {
-        apiKey: header(req, "x-elfa-api-key"),
-      });
+      const apiKey = await resolveApiKey(req, res);
+      if (apiKey === undefined) return;
+      const deps = buildDeps(config, { apiKey: apiKey ?? undefined });
 
       server = createServer(deps);
       transport = new StreamableHTTPServerTransport({

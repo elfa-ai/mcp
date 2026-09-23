@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.2.0
+
+### Added
+
+- **OAuth sign-in for hosted deployments** (`ELFA_MCP_AUTH=oauth`, HTTP transport only). Clients such as ChatGPT, Claude and Codex can connect with a browser sign-in instead of an API key. The server acts as an OAuth resource server under the MCP authorization spec:
+  - It serves RFC 9728 protected-resource metadata at `/.well-known/oauth-protected-resource/mcp` (and at the root path).
+  - A request with no credential gets `401` with a `WWW-Authenticate: Bearer resource_metadata=…` challenge.
+  - Each bearer token is checked against the authorization server's introspection endpoint, which returns the Elfa API key the request runs as. The token itself is never forwarded to the Elfa API.
+  - The token must be issued for this server: its audience has to match `ELFA_MCP_RESOURCE_URL`.
+  - Valid answers are cached for up to 60 seconds.
+  - An unreachable authorization server returns `503`, not `401`, so clients don't restart sign-in because of an outage.
+- An `x-elfa-api-key` header still works in OAuth mode, so API-key users of the same deployment are unaffected.
+
+### Changed
+
+- In OAuth mode `ELFA_API_KEY` is ignored. Every request brings its own credential, and an environment key would otherwise be handed to any caller that sends none. API-key mode keeps its environment fallback.
+
 ## 4.1.0
 
 ### Security

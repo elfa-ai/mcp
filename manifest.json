@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "4.1.0",
+    "version": "4.2.0",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": "/v2"
