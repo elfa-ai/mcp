@@ -39,7 +39,7 @@ describe("plan-gated tools", () => {
 
     const { tools } = await client.listTools();
     const tool = tools.find((t) => t.name === "market_chat");
-    expect(tool?.description).toMatch(/^Not available on this API key's plan: needs Grow, Scale or Pay-as-you-go/);
+    expect(tool?.description).toMatch(/^Requires a higher-tier plan than this API key has/);
     expect(tool?.description).toContain(UPGRADE_URL);
 
     const result = await client.callTool({
@@ -47,20 +47,20 @@ describe("plan-gated tools", () => {
       arguments: { analysisType: "chat", message: "hi" },
     });
     expect(result.isError).toBe(true);
-    expect(JSON.stringify(result.content)).toContain("not included in this API key's plan");
+    expect(JSON.stringify(result.content)).toContain("requires a higher-tier plan");
     expect(chat).not.toHaveBeenCalled();
   });
 
   it("leaves market_chat alone for a key with the chat scope", async () => {
     const client = await connect(deps(), ["key-status", "chat"]);
     const { tools } = await client.listTools();
-    expect(tools.find((t) => t.name === "market_chat")?.description).not.toMatch(/Not available/);
+    expect(tools.find((t) => t.name === "market_chat")?.description).not.toMatch(/higher-tier plan/);
   });
 
   it("leaves every tool alone when the scopes are unknown", async () => {
     const client = await connect(deps());
     const { tools } = await client.listTools();
-    expect(tools.some((t) => t.description?.startsWith("Not available"))).toBe(false);
+    expect(tools.some((t) => t.description?.startsWith("Requires a higher-tier plan"))).toBe(false);
   });
 });
 
@@ -157,7 +157,7 @@ describe("http transport", () => {
         req.end(body);
       });
       expect(seen).toHaveLength(1);
-      expect(text).toContain("Not available on this API key's plan");
+      expect(text).toContain("Requires a higher-tier plan");
     } finally {
       await new Promise<void>((r) => server.close(() => r()));
     }

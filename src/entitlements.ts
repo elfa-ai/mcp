@@ -5,10 +5,11 @@ import { fail } from "./tools/util.js";
 
 /**
  * Plan-gated tools. A key whose plan lacks a tool's scope still sees the tool,
- * but its description says which plans include it and a call answers with the
- * upgrade path instead of reaching the API. That tells the agent (and the
+ * but its description says it needs a higher-tier plan and a call answers with
+ * the upgrade path instead of reaching the API. That tells the agent (and the
  * user) before a call is spent, and points at the upgrade rather than hiding
- * the capability.
+ * the capability. Plan names are left out on purpose: the lineup changes, and
+ * the pricing page is the source of truth.
  *
  * Only self-serve plan upgrades belong here. Scopes granted per key by sales
  * (enterprise endpoints, v3) have no upgrade to point at.
@@ -16,12 +17,10 @@ import { fail } from "./tools/util.js";
 export interface ToolGate {
   /** The oracle route scope the tool needs, as `/v2/key-status` lists it. */
   scope: string;
-  /** The plans that include it, as a user reads them. */
-  plans: string;
 }
 
 export const TOOL_GATES: Readonly<Record<string, ToolGate>> = {
-  market_chat: { scope: "chat", plans: "Grow, Scale or Pay-as-you-go" },
+  market_chat: { scope: "chat" },
 };
 
 export const UPGRADE_URL = "https://www.elfa.ai/pricing";
@@ -43,8 +42,8 @@ export function hasScope(scopes: string[], required: string): boolean {
   });
 }
 
-export function lockedMessage(tool: string, gate: ToolGate): string {
-  return `${tool} is not included in this API key's plan. It needs ${gate.plans}. Upgrade at ${UPGRADE_URL}, then retry.`;
+export function lockedMessage(tool: string): string {
+  return `${tool} requires a higher-tier plan than this API key has. Upgrade at ${UPGRADE_URL}, then retry.`;
 }
 
 /**
@@ -111,9 +110,9 @@ export function applyToolGates(
   for (const [name, gate] of Object.entries(TOOL_GATES)) {
     const tool = tools[name];
     if (!tool || hasScope(entitlements.scopes, gate.scope)) continue;
-    const message = lockedMessage(name, gate);
+    const message = lockedMessage(name);
     tool.update({
-      description: `Not available on this API key's plan: needs ${gate.plans} (${UPGRADE_URL}). ${tool.description ?? ""}`.trim(),
+      description: `Requires a higher-tier plan than this API key has (upgrade at ${UPGRADE_URL}). ${tool.description ?? ""}`.trim(),
       callback: async () => fail(message),
     });
   }
