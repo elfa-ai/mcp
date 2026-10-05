@@ -936,6 +936,27 @@
 				],
 				"type": "object"
 			},
+			"ChatSourceV2": {
+				"description": "A page the answer's research read. Links only: the page's content is not included.",
+				"properties": {
+					"url": {
+						"type": "string"
+					},
+					"kind": {
+						"type": "string",
+						"description": "What the link points at, read from its URL. Current values:\n- `x_post` — a post on X\n- `x_account` — an X profile\n- `telegram` — a Telegram channel or message\n- `dex` — a DEX pair or token page\n- `explorer` — a block-explorer page (address, token, transaction)\n- `prediction_market` — a Polymarket or Kalshi market\n- `web` — any other page, such as a news article\n\nA string rather than an enum so new kinds can ship without breaking\ngenerated clients; treat a value you do not recognise as `web`."
+					},
+					"title": {
+						"type": "string",
+						"description": "What the research step did to reach this link, e.g. \"Searched X\"."
+					}
+				},
+				"required": [
+					"url",
+					"kind"
+				],
+				"type": "object"
+			},
 			"ChatResponseV2": {
 				"properties": {
 					"success": {
@@ -943,6 +964,13 @@
 					},
 					"data": {
 						"properties": {
+							"sources": {
+								"items": {
+									"$ref": "#/components/schemas/ChatSourceV2"
+								},
+								"type": "array",
+								"description": "Present only when the request set `includeSources: true`. Links the\nresearch behind this answer read, in the order it read them, without\nduplicates (at most 50). Empty when the answer used no linkable source.\nA source was read, not necessarily cited in `message`."
+							},
 							"creditsConsumed": {
 								"type": "number",
 								"format": "double"
@@ -1026,6 +1054,11 @@
 					"assetMetadata": {
 						"$ref": "#/components/schemas/ChatAssetMetadataV2",
 						"description": "Required for tokenIntro, tokenAnalysis, and accountAnalysis. See endpoint description for required fields per analysis type."
+					},
+					"includeSources": {
+						"type": "boolean",
+						"description": "Set `true` to receive `data.sources`: the links the research behind the\nanswer read. Omitted or `false` leaves the response unchanged.",
+						"default": false
 					}
 				},
 				"type": "object",
@@ -2190,6 +2223,11 @@
 					"assetMetadata": {
 						"$ref": "#/components/schemas/ChatAssetMetadataV2",
 						"description": "Required for tokenIntro, tokenAnalysis, and accountAnalysis. See endpoint description for required fields per analysis type."
+					},
+					"includeSources": {
+						"type": "boolean",
+						"description": "Set `true` to receive `data.sources`: the links the research behind the\nanswer read. Omitted or `false` leaves the response unchanged.",
+						"default": false
 					}
 				},
 				"type": "object",
@@ -2803,7 +2841,7 @@
 	},
 	"info": {
 		"title": "Elfa Api",
-		"version": "2.7.5",
+		"version": "2.8.2",
 		"description": "API documentation for Elfa"
 	},
 	"paths": {
@@ -3974,7 +4012,7 @@
 						"description": "Unauthorized"
 					}
 				},
-				"description": "Send a message to the Elfa AI and receive a complete response.\nSuited for agents and integrations that do not support server-sent events (SSE).\n\n**Session management:** omit `sessionId` to start a new conversation.\nThe response includes a `sessionId` — pass it in subsequent requests to continue the same conversation.\n\n**Analysis types and required fields:**\n- `chat` (default) — general conversation. Requires `message`.\n- `macro` — macro market overview. No `message` needed.\n- `summary` — quick market summary. No `message` needed.\n- `tokenIntro` — token introduction. Requires `assetMetadata` with `symbol`, or `chain` + `contractAddress`.\n- `tokenAnalysis` — token trade setup analysis. Same `assetMetadata` requirements as `tokenIntro`.\n- `accountAnalysis` — Twitter/X account analysis. Requires `assetMetadata.username`.\n\n`message` is only used for `analysisType: \"chat\"` and is ignored for other\nanalysis types.\n\n**`assetMetadata` fields (when applicable):**\n- `symbol` — token ticker symbol (e.g. `\"BTC\"`, `\"$ETH\"`)\n- `chain` — blockchain name (e.g. `\"ethereum\"`, `\"solana\"`)\n- `contractAddress` — token contract address\n- `username` — Twitter/X username for account analysis",
+				"description": "Send a message to the Elfa AI and receive a complete response.\nSuited for agents and integrations that do not support server-sent events (SSE).\n\n**Session management:** omit `sessionId` to start a new conversation.\nThe response includes a `sessionId` — pass it in subsequent requests to continue the same conversation.\n\n**Analysis types and required fields:**\n- `chat` (default) — general conversation. Requires `message`.\n- `macro` — macro market overview. No `message` needed.\n- `summary` — quick market summary. No `message` needed.\n- `tokenIntro` — token introduction. Requires `assetMetadata` with `symbol`, or `chain` + `contractAddress`.\n- `tokenAnalysis` — token trade setup analysis. Same `assetMetadata` requirements as `tokenIntro`.\n- `accountAnalysis` — Twitter/X account analysis. Requires `assetMetadata.username`.\n\n`message` is only used for `analysisType: \"chat\"` and is ignored for other\nanalysis types.\n\n**Sources (opt-in):** send `includeSources: true` to receive `data.sources`,\nthe links the research behind the answer read (X posts, news, DEX and\nexplorer pages, prediction markets), each with a `kind`. Links only: page\nand post content is not returned. A source was read, not necessarily cited\nin `message`. Without the flag the response is unchanged.\n\n**`assetMetadata` fields (when applicable):**\n- `symbol` — token ticker symbol (e.g. `\"BTC\"`, `\"$ETH\"`)\n- `chain` — blockchain name (e.g. `\"ethereum\"`, `\"solana\"`)\n- `contractAddress` — token contract address\n- `username` — Twitter/X username for account analysis",
 				"summary": "AI chat",
 				"tags": [
 					"v2 Chat"
@@ -4024,7 +4062,7 @@
 						"description": "PAYG or Enterprise plan required"
 					}
 				},
-				"description": "Stream a response from Elfa AI using Server-Sent Events (SSE).\n\nUse this when your client can consume incremental events. Use\n`POST /v2/chat` instead when your integration needs a complete JSON\nresponse.\n\n**Access:** PAYG and Enterprise API keys.\n\n**Response format:** `text/event-stream`.\n\nCommon `data:` event payloads include:\n- `session_info` with `sessionId` and `analysisType`\n- `title` with a generated session or analysis title\n- `text` with incremental Markdown content\n- `text_complete` when incremental text has finished\n- `status` with progress updates\n- `credits` with consumed credits\n- `complete` with final `sessionId`, `success`, and `creditsConsumed`\n- `invalid_request` when a query is rejected by safety checks\n- `error` for stream failures\n\nA `: keep-alive` comment may be sent during long gaps. The stream ends\nwith `data: [DONE]`.\n\nRequest-body semantics match `POST /v2/chat`: `message` is required only\nfor `analysisType: \"chat\"`; token and account modes use `assetMetadata`.",
+				"description": "Stream a response from Elfa AI using Server-Sent Events (SSE).\n\nUse this when your client can consume incremental events. Use\n`POST /v2/chat` instead when your integration needs a complete JSON\nresponse.\n\n**Access:** PAYG and Enterprise API keys.\n\n**Response format:** `text/event-stream`.\n\nCommon `data:` event payloads include:\n- `session_info` with `sessionId` and `analysisType`\n- `title` with a generated session or analysis title\n- `text` with incremental Markdown content\n- `text_complete` when incremental text has finished\n- `status` with progress updates\n- `credits` with consumed credits\n- `complete` with final `sessionId`, `success`, and `creditsConsumed`; with\n  `includeSources: true` in the request it also carries `sources` (the\n  links the research read; same shape as `POST /v2/chat`)\n- `invalid_request` when a query is rejected by safety checks\n- `error` for stream failures\n\nA `: keep-alive` comment may be sent during long gaps. The stream ends\nwith `data: [DONE]`.\n\nRequest-body semantics match `POST /v2/chat`: `message` is required only\nfor `analysisType: \"chat\"`; token and account modes use `assetMetadata`.",
 				"summary": "AI chat stream",
 				"tags": [
 					"v2 Chat"
@@ -4117,7 +4155,7 @@
 						}
 					}
 				},
-				"description": "Ask the AI to help you build an EQL query.\n\nThe response message contains the AI's reply in Markdown. When it generates EQL,\nit will be in a JSON code block that you can extract, validate, and submit.\n\nUse `sessionId` in follow-up requests to maintain conversation context.\n\n### Cost\n\nAPI mode: `1 + dynamic` credits\n- base request charge: `1` credit\n- dynamic usage charge: `ceil(request_cost * 750)` credits\n\nx402 mode is quoted in USD per turn, not credits. The 402 response lists\nboth schemes and the client picks one:\n- `exact` (flat, charged in full): `fast` `$1`, `expert` `$2`\n- `upto` (authorize a ceiling, settle actual cost): `fast` `$2`, `expert` `$6`\n\n### Auth\n\nRequired header:\n```http\nx-elfa-api-key: <api_key>\n```\n\nChat produces drafts only; subsequent activation goes through\n`POST /queries/drafts/{draftId}/convert`.\n\n### Request Example\n\n```json\n{\n  \"message\": \"Alert me when BTC breaks 100k\",\n  \"speed\": \"expert\",\n  \"sessionId\": \"optional-session-id\"\n}\n```\n\n### Response Example (200)\n\n```json\n{\n  \"sessionId\": \"session-uuid\",\n  \"response\": \"I can help with that...\",\n  \"title\": \"BTC Breakout Alert\",\n  \"reasoning\": null,\n  \"planIds\": [],\n  \"credits\": 104\n}\n```\n\n`credits` is what this call cost, and carries the same total as the\n`x-elfa-credits` response header. Chat is dynamically priced, so read it\nrather than assuming a flat cost.\n\n> Best practice: persist `sessionId` and reuse it for follow-up prompts so\n> the model keeps context across turns.",
+				"description": "Ask the AI to help you build an EQL query.\n\nThe response message contains the AI's reply in Markdown. When it generates EQL,\nit will be in a JSON code block that you can extract, validate, and submit.\n\nUse `sessionId` in follow-up requests to maintain conversation context.\n\n### Cost\n\nAPI mode: `1 + dynamic` credits\n- base request charge: `1` credit\n- dynamic usage charge: `ceil(request_cost * 750)` credits\n\nx402 mode is quoted in USD per turn, not credits. The 402 response lists\nthe schemes it accepts and the client picks one:\n- `exact` (flat, charged in full): `fast` `$1`, `expert` `$2`\n- `batch-settlement` (Base, when listed: deposit once into a payment\n  channel; each turn is capped at `fast` `$2`, `expert` `$6` and charged\n  its actual cost)\n\n### Auth\n\nRequired header:\n```http\nx-elfa-api-key: <api_key>\n```\n\nChat produces drafts only; subsequent activation goes through\n`POST /queries/drafts/{draftId}/convert`.\n\n### Request Example\n\n```json\n{\n  \"message\": \"Alert me when BTC breaks 100k\",\n  \"speed\": \"expert\",\n  \"sessionId\": \"optional-session-id\"\n}\n```\n\n### Response Example (200)\n\n```json\n{\n  \"sessionId\": \"session-uuid\",\n  \"response\": \"I can help with that...\",\n  \"title\": \"BTC Breakout Alert\",\n  \"reasoning\": null,\n  \"planIds\": [],\n  \"credits\": 104\n}\n```\n\n`credits` is what this call cost, and carries the same total as the\n`x-elfa-credits` response header. Chat is dynamically priced, so read it\nrather than assuming a flat cost.\n\n> Best practice: persist `sessionId` and reuse it for follow-up prompts so\n> the model keeps context across turns.",
 				"summary": "Builder Chat",
 				"tags": [
 					"v2 Auto"
@@ -6749,7 +6787,7 @@
 						"description": "Payment required (x402)"
 					}
 				},
-				"description": "Send a message to the Elfa AI and receive a complete response.\nSuited for agents and integrations that do not support server-sent events (SSE).\n\n**Analysis types and required fields:**\n- `chat` (default) — general conversation. Requires `message`.\n- `macro` — macro market overview. No `message` needed.\n- `summary` — quick market summary. No `message` needed.\n- `tokenIntro` — token introduction. Requires `assetMetadata` with `symbol`, or `chain` + `contractAddress`.\n- `tokenAnalysis` — token trade setup analysis. Same `assetMetadata` requirements as `tokenIntro`.\n- `accountAnalysis` — Twitter/X account analysis. Requires `assetMetadata.username`.\n\n`message` is only used for `analysisType: \"chat\"` and is ignored for other\nanalysis types. `adaptive` speed is not available on x402.\n\n**`assetMetadata` fields (when applicable):**\n- `symbol` — token ticker symbol (e.g. `\"BTC\"`, `\"$ETH\"`)\n- `chain` — blockchain name (e.g. `\"ethereum\"`, `\"solana\"`)\n- `contractAddress` — token contract address\n- `username` — Twitter/X username for account analysis\n\n**Cost:** speed based. Pay a flat price with the `exact` scheme (`fast` $1,\n`expert` $2), or authorize a ceiling with `upto` (`fast` $2, `expert` $6)\nand settle only what the turn cost. Requires x402 payment.",
+				"description": "Send a message to the Elfa AI and receive a complete response.\nSuited for agents and integrations that do not support server-sent events (SSE).\n\n**Analysis types and required fields:**\n- `chat` (default) — general conversation. Requires `message`.\n- `macro` — macro market overview. No `message` needed.\n- `summary` — quick market summary. No `message` needed.\n- `tokenIntro` — token introduction. Requires `assetMetadata` with `symbol`, or `chain` + `contractAddress`.\n- `tokenAnalysis` — token trade setup analysis. Same `assetMetadata` requirements as `tokenIntro`.\n- `accountAnalysis` — Twitter/X account analysis. Requires `assetMetadata.username`.\n\n`message` is only used for `analysisType: \"chat\"` and is ignored for other\nanalysis types. `adaptive` speed is not available on x402.\n\nSend `includeSources: true` to receive `data.sources`: the links the\nresearch behind the answer read, with a `kind` each. Links only: page and\npost content is not returned.\n\n**`assetMetadata` fields (when applicable):**\n- `symbol` — token ticker symbol (e.g. `\"BTC\"`, `\"$ETH\"`)\n- `chain` — blockchain name (e.g. `\"ethereum\"`, `\"solana\"`)\n- `contractAddress` — token contract address\n- `username` — Twitter/X username for account analysis\n\n**Cost:** speed based. Pay a flat price per turn with the `exact` scheme\n(`fast` $1, `expert` $2). Where the 402 also lists `batch-settlement`\n(Base), you can instead deposit once into a payment channel: each turn is\nthen capped at `fast` $2 / `expert` $6 and charged only what it cost.\nRequires x402 payment.",
 				"summary": "AI chat",
 				"tags": [
 					"x402 Chat"
@@ -6820,7 +6858,7 @@
 						"description": "Payment required (x402)"
 					}
 				},
-				"description": "Ask the AI to help you build an EQL query. It can research live market data, suggest strategies, and return ready-to-use EQL JSON.\n\nThe response message contains the AI's reply in Markdown. When it generates EQL,\nit will be in a JSON code block that you can extract, validate, and submit.\n\nUse `sessionId` in follow-up requests to maintain conversation context.\n\n**Cost:** speed based. Pay a flat price with the `exact` scheme (`fast` $1,\n`expert` $2), or authorize a ceiling with `upto` (`fast` $2, `expert` $6)\nand settle only what the turn cost. Requires x402 payment.",
+				"description": "Ask the AI to help you build an EQL query. It can research live market data, suggest strategies, and return ready-to-use EQL JSON.\n\nThe response message contains the AI's reply in Markdown. When it generates EQL,\nit will be in a JSON code block that you can extract, validate, and submit.\n\nUse `sessionId` in follow-up requests to maintain conversation context.\n\n**Cost:** speed based. Pay a flat price per turn with the `exact` scheme\n(`fast` $1, `expert` $2). Where the 402 also lists `batch-settlement`\n(Base), you can instead deposit once into a payment channel: each turn is\nthen capped at `fast` $2 / `expert` $6 and charged only what it cost.\nRequires x402 payment.",
 				"summary": "Builder Chat",
 				"tags": [
 					"x402 Auto"

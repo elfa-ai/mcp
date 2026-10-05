@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.5.0
+
+### Added
+
+- **`market_chat` returns its sources.** The reply now includes `sources`: the links the research behind the answer read (X posts, news, DEX and explorer pages, prediction markets), in the order it read them, each with a `url`, a `kind` and an optional `title` such as "Searched X". Links only, never the page or post text. A source was read, not necessarily cited in `message`, and the list is empty when the answer used no linkable source. The tool asks for them with `includeSources: true` on `POST /v2/chat` (API 2.8.1); it costs nothing extra. `kind` is a plain string, so treat a value you don't recognise as `web`.
+
 ## 4.4.0
 
 ### Added
