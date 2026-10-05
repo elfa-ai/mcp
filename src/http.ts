@@ -5,6 +5,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { buildDeps, CredentialError } from "./client.js";
 import type { ServerConfig } from "./config.js";
 import { createServer } from "./server.js";
+import { sanitizeClient } from "./userAgent.js";
 import {
   EntitlementCache,
   fetchEntitlements,
@@ -25,6 +26,10 @@ const MCP_PATH = "/mcp";
 function header(req: Request, name: string): string | undefined {
   const value = req.headers[name];
   return Array.isArray(value) ? value[0] : value;
+}
+
+function clientField(value: unknown): string {
+  return sanitizeClient(typeof value === "string" ? value : undefined) ?? "unknown";
 }
 
 function jsonRpcError(res: Response, status: number, message: string): void {
@@ -58,6 +63,8 @@ export interface HttpAppOptions {
   verifier?: TokenVerifier;
   /** Injected in tests; reads `/v2/key-status` otherwise. */
   entitlements?: (deps: Deps) => Promise<Entitlements | undefined>;
+  /** Injected in tests; one line per accepted initialize to stderr otherwise. */
+  log?: (line: string) => void;
 }
 
 export function createHttpApp(
@@ -69,6 +76,8 @@ export function createHttpApp(
   const verifier =
     options.verifier ?? (oauth ? new TokenVerifier(oauth) : undefined);
   const loadEntitlements = options.entitlements ?? fetchEntitlements;
+  const log =
+    options.log ?? ((line: string) => process.stderr.write(`${line}\n`));
   const entitlementCache = new EntitlementCache();
   app.disable("x-powered-by");
   app.use(express.json({ limit: "4mb" }));
@@ -166,7 +175,10 @@ export function createHttpApp(
     try {
       const apiKey = await resolveApiKey(req, res);
       if (apiKey === undefined) return;
-      const deps = buildDeps(config, { apiKey: apiKey ?? undefined });
+      const deps = buildDeps(config, {
+        apiKey: apiKey ?? undefined,
+        client: header(req, "user-agent"),
+      });
 
       const entitlements = apiKey
         ? await entitlementCache.get(apiKey, () => loadEntitlements(deps))
@@ -182,6 +194,14 @@ export function createHttpApp(
         ...(config.allowedOrigins.length > 0
           ? { allowedOrigins: config.allowedOrigins }
           : {}),
+      });
+
+      res.on("finish", () => {
+        if (res.statusCode >= 400) return;
+        const info = server?.server.getClientVersion();
+        if (!info) return;
+        const client = { name: clientField(info.name), version: clientField(info.version) };
+        log(JSON.stringify({ event: "initialize", client }));
       });
 
       res.on("close", () => {
