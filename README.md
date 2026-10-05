@@ -53,6 +53,8 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 | `ELFA_MCP_MAX_RESPONSE_CHARS` | no | Response size ceiling, default `60000` |
 | `ELFA_EXTRA_HEADERS` | no | JSON object of extra headers to send upstream, for proxies and non-production environments |
 
+Upstream requests identify themselves as `User-Agent: elfa-mcp/<version> (<transport>; client=<app>)`. On stdio, `<app>` is the MCP client's name and version from the handshake; over HTTP, it is the connecting client's own `User-Agent` header. Set `User-Agent` in `ELFA_EXTRA_HEADERS` to send your own instead.
+
 The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints.
 
 Some MCP clients apply their own timeout, often around 60 seconds. `narratives` and `market_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.

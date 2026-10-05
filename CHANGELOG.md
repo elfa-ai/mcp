@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.4.0
+
+### Added
+
+- **Upstream requests carry an `elfa-mcp` User-Agent.** Every upstream call now carries `User-Agent: elfa-mcp/<version> (<transport>)`, where the transport is `stdio` or `http`, instead of the SDK's generic `@elfa-ai/sdk/<version>`. When the server knows which app is connected, it adds that too: on HTTP, the client's own `User-Agent`; on stdio, the `clientInfo` name and version from the MCP handshake, e.g. `elfa-mcp/4.4.0 (stdio; client=claude-ai/0.1.0)`. The client part is cut to printable ASCII and 100 characters, with `(`, `)`, `;` and `\` turned into spaces so the comment stays parseable. A `User-Agent` set in `ELFA_EXTRA_HEADERS`, in any casing, still wins.
+- **The HTTP server logs each handshake.** One JSON line per successful `initialize` goes to stderr, `{"event":"initialize","client":{"name":…,"version":…}}`, so you can see which apps connect even when they never call a tool. Nothing else from the request is logged.
+
 ## 4.3.0
 
 ### Changed

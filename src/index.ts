@@ -1,5 +1,9 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { buildDeps, CredentialError } from "./client.js";
+import {
+  buildDeps,
+  CredentialError,
+  identifyClientOnInitialize,
+} from "./client.js";
 import { loadConfig } from "./config.js";
 import { createHttpApp } from "./http.js";
 import { createServer } from "./server.js";
@@ -21,6 +25,7 @@ async function main(): Promise<void> {
   const deps = buildDeps(config);
   // Read once: a stdio server runs as one key for its whole life.
   const server = createServer(deps, await fetchEntitlements(deps));
+  identifyClientOnInitialize(server, deps, config);
   await server.connect(new StdioServerTransport());
 }
 
