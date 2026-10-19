@@ -3,7 +3,7 @@ import type { EqlQuery, TradableExchange } from "@elfa-ai/sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
 import { asArray } from "../shape.js";
-import { eqlQueryArg, fail, pickDefined, run } from "./util.js";
+import { eqlQueryArg, fail, pickDefined, rejectCredentials, run } from "./util.js";
 
 const EXCHANGES = ["hyperliquid", "binance"] as const;
 
@@ -83,6 +83,9 @@ export function registerAutoValidate(server: McpServer, deps: Deps): void {
       if (!args.query && !args.draftId) {
         return fail("Pass either query or draftId. Retry with one of them set.");
       }
+
+      const credential = rejectCredentials(args.query);
+      if (credential) return credential;
 
       return run(deps, async () => {
         const response = args.draftId

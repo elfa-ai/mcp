@@ -31,6 +31,8 @@ export interface ServerConfig {
   maxResponseChars: number;
   auth: AuthMode;
   oauth: OAuthConfig | undefined;
+  /** Token OpenAI's plugin portal asks the MCP host to serve to prove domain ownership. */
+  openaiAppsChallenge: string | undefined;
 }
 
 const DEFAULT_PORT = 3000;
@@ -133,5 +135,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     ),
     auth,
     oauth: auth === "oauth" ? oauthConfig(env) : undefined,
+    openaiAppsChallenge: env.ELFA_MCP_OPENAI_APPS_CHALLENGE?.trim() || undefined,
   };
 }

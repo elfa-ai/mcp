@@ -10,7 +10,7 @@ export function registerTopAccounts(server: McpServer, deps: Deps): RegisteredTo
     {
       title: "Top accounts",
       description:
-        "X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers. Free on Pay-as-you-go and Grow plans until 31 October 2026. Standing measures attention, not accuracy; track is null for an account that has never opened a position. For the best callers use metric=alphaScore, not avgReturn, which a few big wins or a rally can top. Track metrics rank only accounts with at least 20 scored positions, over every position since late June 2026; quote the number you ranked by with scoredEpisodes. Pass a handle to the calls tool to see its positions.",
+        "X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers.. Standing measures attention, not accuracy; track is null for an account that has never opened a position. For the best callers use metric=alphaScore, not avgReturn, which a few big wins or a rally can top. Track metrics rank only accounts with at least 20 scored positions, over every position since late June 2026; quote the number you ranked by with scoredEpisodes. Pass a handle to the calls tool to see its positions.",
       inputSchema: {
         metric: z
           .enum(["standing", "alphaScore", "hitRate", "avgReturn"])
@@ -32,7 +32,7 @@ export function registerTopAccounts(server: McpServer, deps: Deps): RegisteredTo
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) =>

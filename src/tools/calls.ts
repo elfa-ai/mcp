@@ -23,7 +23,7 @@ export function registerCalls(server: McpServer, deps: Deps): RegisteredTool {
     {
       title: "Calls",
       description:
-        "What accounts are doing: positions taken in posts on X and Telegram. Free on Pay-as-you-go and Grow plans until 31 October 2026. level=calls: each post that opened, added to, trimmed, reaffirmed, reversed, closed or stopped out of a position. level=episodes: each position from open to close, with entry and exit prices and the author's track record. level=positioning: open longs and shorts on one asset right now. level=episodes with status=open and from set to now reads what every matching account holds right now. Not returned: post text or a recommendation.",
+        "What accounts are doing: positions taken in posts on X and Telegram.. level=calls: each post that opened, added to, trimmed, reaffirmed, reversed, closed or stopped out of a position. level=episodes: each position from open to close, with entry and exit prices and the author's track record. level=positioning: open longs and shorts on one asset right now. level=episodes with status=open and from set to now reads what every matching account holds right now. Not returned: post text or a recommendation.",
       inputSchema: {
         level: z
           .enum(["calls", "episodes", "positioning"])
@@ -68,7 +68,7 @@ export function registerCalls(server: McpServer, deps: Deps): RegisteredTool {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) => {

@@ -98,6 +98,56 @@ describe("server", () => {
     await server.close();
   });
 
+  it("refuses Auto queries that carry a credential before calling the API", async () => {
+    const { client, server } = await connect();
+    const telegram = {
+      conditions: { AND: [] },
+      actions: [
+        { stepId: "step_1", type: "telegram_bot", params: { botToken: "123:abc", chatId: "1" } },
+      ],
+      expiresIn: "24h",
+    };
+    const signedWebhook = {
+      conditions: { AND: [] },
+      actions: [
+        {
+          stepId: "step_1",
+          type: "llm",
+          params: { callback: { webhook: { url: "https://example.com", signingSecret: "s" } } },
+        },
+      ],
+      expiresIn: "24h",
+    };
+
+    const calls = [
+      { name: "auto_query_write", arguments: { method: "create", query: telegram } },
+      { name: "auto_draft", arguments: { method: "upsert", query: telegram } },
+      { name: "auto_validate", arguments: { method: "query", query: signedWebhook } },
+    ];
+
+    for (const call of calls) {
+      const result = await client.callTool(call);
+      expect(result.isError, call.name).toBe(true);
+      expect(JSON.stringify(result.content), call.name).toContain("carries a credential");
+    }
+
+    await server.close();
+  });
+
+  it("marks only the tools bounded to the caller's own account as closed world", async () => {
+    const { client, server } = await connect();
+    const { tools } = await client.listTools();
+
+    const closed = tools
+      .filter((tool) => tool.annotations?.openWorldHint === false)
+      .map((tool) => tool.name)
+      .sort();
+
+    expect(closed).toEqual(["api_status", "auto_query", "auto_validate"]);
+
+    await server.close();
+  });
+
   it("reports missing arguments as a recoverable tool error", async () => {
     const { client, server } = await connect();
 

@@ -56,7 +56,7 @@ export function hasScope(scopes: string[], required: string): boolean {
 }
 
 export function lockedMessage(tool: string): string {
-  return `${tool} requires a higher-tier plan than this API key has. Upgrade at ${UPGRADE_URL}, then retry.`;
+  return `${tool} requires a higher-tier plan than this API key has, so it is unavailable on this key. Plans are described at ${UPGRADE_URL}.`;
 }
 
 /**
@@ -125,7 +125,7 @@ export function applyToolGates(
     if (!tool || gate.scopes.some((scope) => hasScope(entitlements.scopes, scope))) continue;
     const message = lockedMessage(name);
     tool.update({
-      description: `Requires a higher-tier plan than this API key has (upgrade at ${UPGRADE_URL}). ${tool.description ?? ""}`.trim(),
+      description: `Requires a higher-tier plan than this API key has (plans are described at ${UPGRADE_URL}). ${tool.description ?? ""}`.trim(),
       callback: async () => fail(message),
     });
   }

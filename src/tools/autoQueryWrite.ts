@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { EqlQuery } from "@elfa-ai/sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
-import { eqlQueryArg, fail, pickDefined, run } from "./util.js";
+import { eqlQueryArg, fail, pickDefined, rejectCredentials, run } from "./util.js";
 
 export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
   server.registerTool(
@@ -41,7 +41,7 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: false,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) => {
@@ -49,6 +49,8 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
         if (!args.query) {
           return fail("method=create needs a query. Build one with auto_build.");
         }
+        const credential = rejectCredentials(args.query);
+        if (credential) return credential;
       } else if (!args.queryId) {
         return fail(`method=${args.method} needs queryId. Find one with auto_query.`);
       }

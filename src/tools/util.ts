@@ -54,7 +54,7 @@ export const repostsArg = z
 export const eqlQueryArg = z
   .record(z.unknown())
   .describe(
-    "EQL query object with conditions, actions and expiresIn. Build it with auto_build and check it with auto_validate first.",
+    "EQL query object with conditions, actions and expiresIn. Build it with auto_build and check it with auto_validate first. Use notify or webhook actions: a query carrying a credential, such as a telegram_bot botToken or a webhook signingSecret, is refused.",
   );
 
 export const v3FromArg = z
@@ -124,6 +124,33 @@ export function page(
     hasMore: response.hasMore === true,
     servedFrom: typeof response.servedFrom === "number" ? response.servedFrom : null,
   };
+}
+
+const CREDENTIAL_FIELDS = new Set(["bottoken", "signingsecret"]);
+
+export function credentialField(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = credentialField(item);
+      if (found) return found;
+    }
+    return undefined;
+  }
+  if (typeof value !== "object" || value === null) return undefined;
+  for (const [key, entry] of Object.entries(value)) {
+    if (CREDENTIAL_FIELDS.has(key.toLowerCase())) return key;
+    const found = credentialField(entry);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+export function rejectCredentials(query: unknown): CallToolResult | undefined {
+  const field = credentialField(query);
+  if (!field) return undefined;
+  return errorResult(
+    `The query carries a credential in ${field}. This server never accepts credentials as tool arguments, so telegram_bot actions and webhook signing secrets cannot be set here. Use a notify action, or a webhook without signingSecret, and set those up through the Elfa API directly.`,
+  );
 }
 
 export function run(

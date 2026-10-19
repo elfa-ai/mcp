@@ -26,7 +26,7 @@ export function registerMarket(server: McpServer, deps: Deps): RegisteredTool {
     {
       title: "Market",
       description:
-        "Whole-market views, no asset needed. Free on Pay-as-you-go and Grow plans until 31 October 2026. view=mindshare ranks assets by share of attention over a period, with hot on those heating up. view=call_book is the crowd's long/short lean, one bar per hour plus a live tick: read crowdingPercentile rather than longShare, since the accounts lean long almost always. view=trending_contracts ranks contract addresses by how many posts pasted them, crypto only, and the unnamed ones are often the ones worth watching.",
+        "Whole-market views, no asset needed.. view=mindshare ranks assets by share of attention over a period, with hot on those heating up. view=call_book is the crowd's long/short lean, one bar per hour plus a live tick: read crowdingPercentile rather than longShare, since the accounts lean long almost always. view=trending_contracts ranks contract addresses by how many posts pasted them, crypto only, and the unnamed ones are often the ones worth watching.",
       inputSchema: {
         view: z
           .enum(["mindshare", "call_book", "trending_contracts"])
@@ -64,7 +64,7 @@ export function registerMarket(server: McpServer, deps: Deps): RegisteredTool {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) => {

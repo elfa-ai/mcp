@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.9.0
+
+### Changed
+
+- **Auto queries can't carry credentials.** `auto_query_write` (create), `auto_draft` (upsert) and `auto_validate` refuse a query that contains a `botToken` or `signingSecret` field anywhere in it, before calling the API. The repository rule is that tools never accept credentials as arguments, and a `telegram_bot` action or a signed webhook could pass one through the free-form query object. Use `notify`, or a webhook without `signingSecret`; set up Telegram delivery and signed webhooks through the Elfa API directly.
+- **`openWorldHint` is `true` on tools that read public data or reach open-ended destinations**: `mentions`, `trending`, `narratives`, `account_stats`, `market_chat`, `auto_build`, `auto_query_write`, `auto_draft`, `entities`, `events`, `market`, `calls` and `top_accounts`. `api_status`, `auto_query` and `auto_validate` stay `false`, since they only touch the caller's own account.
+- Plan and credit messages explain what is unavailable instead of telling the user to upgrade or top up. Plan-gated tools now say plans are described at the pricing page.
+- The server instructions and the `entities`, `events`, `market`, `calls` and `top_accounts` descriptions no longer say the v3 tools are free on Pay-as-you-go and Grow. Plan details belong on the pricing page, not in text the model reads.
+
+### Added
+
+- `ELFA_MCP_OPENAI_APPS_CHALLENGE` serves OpenAI's plugin domain-verification token as plain text at `/.well-known/openai-apps-challenge`. The route exists only when the variable is set.
+- `plugins/elfa/` holds a draft plugin package for OpenAI's plugin directory: the manifest, the MCP connection to `https://mcp.elfa.ai/mcp` and a starter skill. It isn't submitted yet.
+
 ## 4.8.0
 
 ### Added

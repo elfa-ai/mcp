@@ -27,7 +27,7 @@ export function registerEvents(server: McpServer, deps: Deps): RegisteredTool {
     {
       title: "Events",
       description:
-        "What is happening in crypto and equity markets, written up from posts across many sources. Free on Pay-as-you-go and Grow plans until 31 October 2026. level=events: what happened, what it names, how prices reacted where measured (impacts is empty on most events), and the posts behind it. level=storylines: the events of one development, threaded over days. level=arcs: storylines grouped into a larger movement. Search any level by topic with q, filter by asset with entityIds from the entities tool, or fetch up to 30 you hold with ids. Not returned: post text, a sentiment score or a price.",
+        "What is happening in crypto and equity markets, written up from posts across many sources.. level=events: what happened, what it names, how prices reacted where measured (impacts is empty on most events), and the posts behind it. level=storylines: the events of one development, threaded over days. level=arcs: storylines grouped into a larger movement. Search any level by topic with q, filter by asset with entityIds from the entities tool, or fetch up to 30 you hold with ids. Not returned: post text, a sentiment score or a price.",
       inputSchema: {
         level: z
           .enum(["events", "storylines", "arcs"])
@@ -136,7 +136,7 @@ export function registerEvents(server: McpServer, deps: Deps): RegisteredTool {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) =>

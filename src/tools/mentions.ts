@@ -84,7 +84,7 @@ export function registerMentions(server: McpServer, deps: Deps): void {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) => {

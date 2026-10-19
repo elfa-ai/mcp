@@ -26,7 +26,7 @@ const INSTRUCTIONS = `Elfa gives you crypto social intelligence plus Auto, a con
 
 Start cheap. trending, mentions and account_stats cost 1 credit. narratives costs 5 and market_chat costs more, so reach for them only when metrics are not enough. If a call fails on auth or credits, check api_status.
 
-entities, events, market, calls and top_accounts read API v3, across crypto and equities, free on Pay-as-you-go and Grow plans until 31 October 2026. events and calls filter by entity id, not ticker: resolve an asset with entities first and reuse the id.
+entities, events, market, calls and top_accounts read API v3, across crypto and equities. events and calls filter by entity id, not ticker: resolve an asset with entities first and reuse the id.
 
 Auto is a three step flow: auto_build drafts EQL from plain language, auto_validate checks it and returns the cost, auto_query_write activates it. Never activate without showing the user the estimated cost and the action that will fire.
 

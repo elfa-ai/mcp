@@ -1,0 +1,49 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "elfa",
+  "version": "0.1.0",
+  "description": "Crypto social intelligence from X and Telegram, and Auto alerts that notify you when market or social conditions are met.",
+  "author": {
+    "name": "Elfa AI",
+    "email": "support@elfa.ai",
+    "url": "https://www.elfa.ai"
+  },
+  "homepage": "https://www.elfa.ai",
+  "repository": "https://github.com/elfa-ai/mcp",
+  "license": "MIT",
+  "keywords": [
+    "crypto",
+    "social",
+    "sentiment",
+    "trending",
+    "alerts",
+    "research"
+  ],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Elfa",
+        "shortDescription": "Crypto social intelligence",
+        "longDescription": "Elfa tracks what crypto traders and researchers say on X and Telegram, and turns it into data you can ask about in chat.\n\nUse it to see which tokens are trending in social conversation, read the most engaged posts about a ticker or keyword, and get summaries of the narratives forming around the market. For questions metrics can't answer, Elfa's market chat writes analysis: macro overviews, token analysis and account analysis.\n\nAuto watches price, technical and social conditions for you and notifies you when they are met. You describe the condition in plain language, review the draft and its estimated cost, and only then activate it. Auto sends notifications and webhooks; it never places trades or moves funds.\n\nElfa is a research tool for crypto-literate users. It reports what people are saying and what the data shows, not financial advice. Social posts are third-party content and can be wrong or promotional. Sign in with your Elfa account; usage counts against that account's plan.",
+        "developerName": "Elfa AI",
+        "category": "Finance",
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
+        "websiteURL": "https://www.elfa.ai",
+        "supportURL": "https://www.elfa.ai/contact",
+        "privacyPolicyURL": "https://www.elfa.ai/privacy",
+        "termsOfServiceURL": "https://www.elfa.ai/terms",
+        "defaultPrompt": [
+          "Which tokens are trending on crypto Twitter today?",
+          "What are people saying about SOL in the last 24 hours?",
+          "Alert me when BTC drops below 90k."
+        ],
+        "composerIcon": "./assets/logo.png",
+        "logo": "./assets/logo.png"
+      },
+      "onboardingSkill": "./skills/get-started/SKILL.md"
+    }
+  }
+}

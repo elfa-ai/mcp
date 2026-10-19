@@ -44,7 +44,7 @@ describe("errors", () => {
       "No longer available",
     );
     expect(describeError({ statusCode: 402, message: "no credits" })).toContain(
-      "Top up",
+      "no credits left",
     );
     expect(describeError({ statusCode: 503, message: "down" })).toContain(
       "server side",

@@ -37,7 +37,7 @@ export function registerAutoBuild(server: McpServer, deps: Deps): void {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) =>

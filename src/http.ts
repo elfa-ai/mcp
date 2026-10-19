@@ -100,6 +100,13 @@ export function createHttpApp(
     res.json({ ok: true });
   });
 
+  const challenge = config.openaiAppsChallenge;
+  if (challenge) {
+    app.get("/.well-known/openai-apps-challenge", (_req, res) => {
+      res.type("text/plain").send(challenge);
+    });
+  }
+
   if (oauth) {
     // RFC 9728 metadata: where to get a token for this server. Served at the
     // path-suffixed location and at the root, which older clients probe.

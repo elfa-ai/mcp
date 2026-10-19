@@ -92,7 +92,7 @@ export function registerChat(server: McpServer, deps: Deps): RegisteredTool {
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,
-        openWorldHint: false,
+        openWorldHint: true,
       },
     },
     async (args) => {

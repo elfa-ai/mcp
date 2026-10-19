@@ -32,7 +32,7 @@ export function describeError(error: unknown): string {
     case 401:
       return `Authentication failed: ${detail}. Verify ELFA_API_KEY.`;
     case 402:
-      return `Out of credits: ${detail}. Top up or upgrade the plan, then retry.`;
+      return `Out of credits: ${detail}. This key has no credits left for the request, so retrying will not help until it has more.`;
     case 403:
       return `Not permitted on this key: ${detail}. The feature may need to be enabled for the key. See ${DOCS}.`;
     case 404:

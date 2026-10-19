@@ -163,6 +163,7 @@ That includes a public domain, a reverse proxy, and a container that maps the po
 | `ELFA_MCP_PORT` | no | Bind port, default `3000` |
 | `ELFA_MCP_ALLOWED_HOSTS` | no | Comma separated `Host` allowlist, defaults to the loopback names bound |
 | `ELFA_MCP_ALLOWED_ORIGINS` | no | Comma separated `Origin` allowlist |
+| `ELFA_MCP_OPENAI_APPS_CHALLENGE` | no | Domain-verification token from OpenAI's plugin portal, served as plain text at `/.well-known/openai-apps-challenge` |
 
 Set `ELFA_MCP_ALLOWED_ORIGINS` as well when browsers call the server directly. It complements the host allowlist rather than replacing it: a rebound request is same origin, so it carries no `Origin` header for that list to check, and the `Host` header is the only one still naming the attacker's domain.
 

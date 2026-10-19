@@ -93,3 +93,38 @@ describe("dns rebinding protection", () => {
     expect(await post(port, `attacker.example:${port}`)).toBe(403);
   });
 });
+
+function get(port: number, path: string): Promise<{ status: number; type: string; body: string }> {
+  return new Promise((resolve, reject) => {
+    http
+      .get({ hostname: "127.0.0.1", port, path }, (res) => {
+        let body = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => (body += chunk));
+        res.on("end", () =>
+          resolve({
+            status: res.statusCode ?? 0,
+            type: String(res.headers["content-type"] ?? ""),
+            body,
+          }),
+        );
+      })
+      .on("error", reject);
+  });
+}
+
+describe("openai apps domain challenge", () => {
+  it("serves the configured token as bare text", async () => {
+    const port = await listen({ ELFA_MCP_OPENAI_APPS_CHALLENGE: " token-123 \n" });
+    const res = await get(port, "/.well-known/openai-apps-challenge");
+    expect(res.status).toBe(200);
+    expect(res.type).toMatch(/^text\/plain/);
+    expect(res.body).toBe("token-123");
+  });
+
+  it("is absent when no token is configured", async () => {
+    const port = await listen({});
+    const res = await get(port, "/.well-known/openai-apps-challenge");
+    expect(res.status).toBe(404);
+  });
+});
