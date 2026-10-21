@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "4.9.0",
+    "version": "4.9.1",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": [
@@ -28,10 +28,10 @@
       ]
     },
     {
-      "name": "mentions",
-      "title": "Mentions",
-      "summary": "Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets.",
-      "credits": "1 per call",
+      "name": "entities",
+      "title": "Entities",
+      "summary": "Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search.",
+      "credits": "Free on PAYG and Grow until 31 Oct 2026",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -39,16 +39,14 @@
         "openWorldHint": false
       },
       "operations": [
-        "getTopMentions-v2",
-        "getKeywordMentions-v2",
-        "getTokenNews-v2"
+        "entities-list-v3"
       ]
     },
     {
-      "name": "trending",
-      "title": "Trending",
-      "summary": "What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses.",
-      "credits": "1 per call",
+      "name": "events",
+      "title": "Events",
+      "summary": "What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic.",
+      "credits": "Free on PAYG and Grow until 31 Oct 2026",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -56,16 +54,16 @@
         "openWorldHint": false
       },
       "operations": [
-        "getTrendingTokens-v2",
-        "getTrendingCAsTwitter-v2",
-        "getTrendingCAsTelegram-v2"
+        "events-list-v3",
+        "storylines-list-v3",
+        "arcs-list-v3"
       ]
     },
     {
-      "name": "narratives",
-      "title": "Narratives",
-      "summary": "Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords.",
-      "credits": "5 per call",
+      "name": "market",
+      "title": "Market",
+      "summary": "Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them.",
+      "credits": "Free on PAYG and Grow until 31 Oct 2026",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -73,15 +71,18 @@
         "openWorldHint": false
       },
       "operations": [
-        "getTrendingNarratives-v2",
-        "getEventSummary-v2"
+        "mindshare-crypto-v3",
+        "mindshare-equity-v3",
+        "call-book-crypto-v3",
+        "call-book-equity-v3",
+        "trending-contracts-v3"
       ]
     },
     {
-      "name": "account_stats",
-      "title": "Account stats",
-      "summary": "Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026.",
-      "credits": "1 per call",
+      "name": "calls",
+      "title": "Calls",
+      "summary": "Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now.",
+      "credits": "Free on PAYG and Grow until 31 Oct 2026",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -89,22 +90,24 @@
         "openWorldHint": false
       },
       "operations": [
-        "getAccountSmartStats-v2"
+        "calls-list-v3",
+        "call-episodes-list-v3",
+        "positioning-v3"
       ]
     },
     {
-      "name": "market_chat",
-      "title": "Market chat",
-      "summary": "Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis.",
-      "credits": "Varies by speed",
+      "name": "top_accounts",
+      "title": "Top accounts",
+      "summary": "X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn).",
+      "credits": "Free on PAYG and Grow until 31 Oct 2026",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
-        "idempotentHint": false,
+        "idempotentHint": true,
         "openWorldHint": false
       },
       "operations": [
-        "chat-v2"
+        "top-accounts-v3"
       ]
     },
     {
@@ -196,10 +199,10 @@
       ]
     },
     {
-      "name": "entities",
-      "title": "Entities",
-      "summary": "Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search.",
-      "credits": "Free on PAYG and Grow until 31 Oct 2026",
+      "name": "mentions",
+      "title": "Mentions",
+      "summary": "Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets.",
+      "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -207,14 +210,16 @@
         "openWorldHint": false
       },
       "operations": [
-        "entities-list-v3"
+        "getTopMentions-v2",
+        "getKeywordMentions-v2",
+        "getTokenNews-v2"
       ]
     },
     {
-      "name": "events",
-      "title": "Events",
-      "summary": "What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic.",
-      "credits": "Free on PAYG and Grow until 31 Oct 2026",
+      "name": "trending",
+      "title": "Trending",
+      "summary": "What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses.",
+      "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -222,16 +227,16 @@
         "openWorldHint": false
       },
       "operations": [
-        "events-list-v3",
-        "storylines-list-v3",
-        "arcs-list-v3"
+        "getTrendingTokens-v2",
+        "getTrendingCAsTwitter-v2",
+        "getTrendingCAsTelegram-v2"
       ]
     },
     {
-      "name": "market",
-      "title": "Market",
-      "summary": "Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them.",
-      "credits": "Free on PAYG and Grow until 31 Oct 2026",
+      "name": "narratives",
+      "title": "Narratives",
+      "summary": "Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords.",
+      "credits": "5 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -239,18 +244,15 @@
         "openWorldHint": false
       },
       "operations": [
-        "mindshare-crypto-v3",
-        "mindshare-equity-v3",
-        "call-book-crypto-v3",
-        "call-book-equity-v3",
-        "trending-contracts-v3"
+        "getTrendingNarratives-v2",
+        "getEventSummary-v2"
       ]
     },
     {
-      "name": "calls",
-      "title": "Calls",
-      "summary": "Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now.",
-      "credits": "Free on PAYG and Grow until 31 Oct 2026",
+      "name": "account_stats",
+      "title": "Account stats",
+      "summary": "Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026.",
+      "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -258,24 +260,22 @@
         "openWorldHint": false
       },
       "operations": [
-        "calls-list-v3",
-        "call-episodes-list-v3",
-        "positioning-v3"
+        "getAccountSmartStats-v2"
       ]
     },
     {
-      "name": "top_accounts",
-      "title": "Top accounts",
-      "summary": "X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn).",
-      "credits": "Free on PAYG and Grow until 31 Oct 2026",
+      "name": "market_chat",
+      "title": "Market chat",
+      "summary": "Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis.",
+      "credits": "Varies by speed",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
-        "idempotentHint": true,
+        "idempotentHint": false,
         "openWorldHint": false
       },
       "operations": [
-        "top-accounts-v3"
+        "chat-v2"
       ]
     }
   ],
