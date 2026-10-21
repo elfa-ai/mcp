@@ -1,6 +1,6 @@
 # Elfa MCP
 
-Model Context Protocol server for the [Elfa API](https://docs.elfa.ai) — crypto social intelligence from X and Telegram, API v3 events, positions and rankings across crypto and equities, plus **Auto**, a condition engine that watches the market and fires an action when your conditions are met.
+Model Context Protocol server for the [Elfa API](https://docs.elfa.ai) — API v3 events, positions and rankings across crypto and equities, **Auto**, a condition engine that watches the market and fires an action when your conditions are met, plus crypto social intelligence from X and Telegram.
 
 Works with any MCP client, either signed in to the hosted server or running locally with an API key.
 
@@ -74,21 +74,21 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 | Tool | Mode | Cost | What it does |
 | --- | --- | --- | --- |
 | `api_status` | read | Free | Check API key tier, credit usage and remaining requests, and historyFrom, how far back events, market and calls read. Also confirms the API is reachable. |
-| `mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets. |
-| `trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
-| `narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
-| `account_stats` | read | 1 per call | Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026. |
-| `market_chat` | read | Varies by speed | Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis. |
-| `auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
-| `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue. |
-| `auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
-| `auto_query_write` | write | 5 plus LLM usage to create, free to cancel or delete | Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met. |
-| `auto_draft` | write | Free, except convert which costs the same as creating a query | Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query. |
 | `entities` | read | Free on PAYG and Grow until 31 Oct 2026 | Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search. |
 | `events` | read | Free on PAYG and Grow until 31 Oct 2026 | What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic. |
 | `market` | read | Free on PAYG and Grow until 31 Oct 2026 | Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them. |
 | `calls` | read | Free on PAYG and Grow until 31 Oct 2026 | Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now. |
 | `top_accounts` | read | Free on PAYG and Grow until 31 Oct 2026 | X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn). |
+| `auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
+| `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue. |
+| `auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
+| `auto_query_write` | write | 5 plus LLM usage to create, free to cancel or delete | Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met. |
+| `auto_draft` | write | Free, except convert which costs the same as creating a query | Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query. |
+| `mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets. |
+| `trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
+| `narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
+| `account_stats` | read | 1 per call | Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026. |
+| `market_chat` | read | Varies by speed | Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis. |
 
 Not exposed as tools:
 

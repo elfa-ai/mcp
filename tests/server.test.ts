@@ -33,12 +33,12 @@ async function connect() {
 }
 
 describe("server", () => {
-  it("registers exactly the tools listed in the manifest", async () => {
+  it("registers exactly the tools listed in the manifest, in its order", async () => {
     const { client, server } = await connect();
     const { tools } = await client.listTools();
 
-    expect(tools.map((tool) => tool.name).sort()).toEqual(
-      manifest.tools.map((tool) => tool.name).sort(),
+    expect(tools.map((tool) => tool.name)).toEqual(
+      manifest.tools.map((tool) => tool.name),
     );
 
     await server.close();

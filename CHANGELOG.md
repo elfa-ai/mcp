@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.9.1
+
+### Changed
+
+- **API v3 comes first, then Auto, then API v2.** The server instructions point agents at the v3 tools before the v2 ones, and fall back to v2 when the plan does not include v3. Tools are listed in the same order: `api_status`, the v3 tools, the Auto tools, then the v2 tools. The README table and `manifest.json` follow it.
+
 ## 4.9.0
 
 ### Changed
