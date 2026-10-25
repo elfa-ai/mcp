@@ -11,13 +11,13 @@ Elfa gives market context across crypto and equities from posts on X and Telegra
 
 1. `entities` turns a ticker, $cashtag, name, @handle or contract address into an entity id. It matches exactly, so check the name on the first row. Resolve once and reuse the id: `events` and `calls` filter by entity id, not ticker.
 2. `events` for what is happening and why. `level=events` for single events, `level=storylines` for one development over days, `level=arcs` for a larger movement. Search by topic with `q` or filter by asset with `entityIds`.
-3. `market` for whole-market views with no asset needed: `view=mindshare` for where attention is going, `view=call_book` for the crowd's long/short lean, `view=trending_contracts` for contract addresses people are pasting.
+3. `market` for whole-market views with no asset needed: `view=mindshare` for where attention is going, `view=call_book` for the crowd's long/short lean, `view=trending_contracts` for contract addresses people are pasting. It reads crypto unless you set `market=equity`; `trending_contracts` is crypto only.
 4. `calls` for positions accounts take in their posts. `level=positioning` for open longs and shorts on one asset now, `level=episodes` for each position from open to close.
 5. `top_accounts` for the accounts with the most standing, or the best track record as callers with `metric=alphaScore`.
 
 ## API v2 tools
 
-If a v3 tool says it needs a higher-tier plan or is not permitted on this key, use these instead. They are also the right tools when the user wants the posts themselves.
+They read crypto social posts, and are the right tools when the user wants the posts themselves. If a v3 tool says it needs a higher-tier plan or is not permitted on this key, use them for crypto social questions. They have no equity data and no events, positions or caller track records, so for those tell the user the v3 tool is not available on their plan rather than answering from posts.
 
 1. `trending` for tickers or contract addresses gaining attention.
 2. `mentions` for the posts behind a ticker or keyword. `mode=top` ranks by engagement, `mode=search` filters by keyword or account, `mode=news` returns posts from accounts tagged as news sources.
