@@ -1,33 +1,20 @@
 import { z } from "zod";
-import type { EqlQuery } from "@elfa-ai/sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
-import { eqlQueryArg, fail, pickDefined, rejectCredentials, run } from "./util.js";
+import { fail, pickDefined, run } from "./util.js";
+
+const TITLE = "Read Auto drafts";
 
 export function registerAutoDraft(server: McpServer, deps: Deps): void {
   server.registerTool(
     "auto_draft",
     {
-      title: "Auto drafts",
+      title: TITLE,
       description:
-        "Park an Auto query without activating it. Drafts never evaluate and never fire. Free, except method=convert which activates the draft and costs the same as creating a query. Use drafts when the user is still deciding.",
+        "Read side of Auto drafts. Free. method=list browses saved drafts, method=get returns one draft. A draft is an Auto query parked without activating it: it never evaluates and never fires.",
       inputSchema: {
-        method: z
-          .enum(["list", "get", "upsert", "delete", "convert"])
-          .describe(
-            "upsert creates or updates a draft. convert activates it as a live query.",
-          ),
-        draftId: z
-          .string()
-          .optional()
-          .describe("Required for get, delete and convert. Optional on upsert to update."),
-        query: eqlQueryArg.optional(),
-        title: z.string().max(120).optional().describe("Title carried into the live query."),
-        description: z
-          .string()
-          .max(500)
-          .optional()
-          .describe("Description carried into the live query."),
+        method: z.enum(["list", "get"]).describe("Which read to perform."),
+        draftId: z.string().optional().describe("Required for method=get."),
         status: z.string().optional().describe("Filter for method=list."),
         search: z.string().optional().describe("Free text filter for method=list."),
         limit: z.number().int().min(1).max(50).default(10).describe("Page size."),
@@ -38,72 +25,37 @@ export function registerAutoDraft(server: McpServer, deps: Deps): void {
         data: z.unknown(),
       },
       annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        idempotentHint: false,
-        openWorldHint: true,
+        title: TITLE,
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
       },
     },
     async (args) => {
-      if (args.method === "upsert") {
-        if (!args.query) {
-          return fail("method=upsert needs a query. Build one with auto_build.");
-        }
-        const credential = rejectCredentials(args.query);
-        if (credential) return credential;
-      }
-
-      const needsId =
-        args.method === "get" ||
-        args.method === "delete" ||
-        args.method === "convert";
-
-      if (needsId && !args.draftId) {
-        return fail(`method=${args.method} needs draftId. Find one with method=list.`);
+      if (args.method === "get" && !args.draftId) {
+        return fail("method=get needs draftId. Find one with method=list.");
       }
 
       return run(deps, async () => {
-        switch (args.method) {
-          case "get":
-            return {
-              method: args.method,
-              data: await deps.sdk.auto.getDraft(args.draftId as string),
-            };
-          case "upsert":
-            return {
-              method: args.method,
-              data: await deps.sdk.auto.upsertDraft(
-                pickDefined({
-                  id: args.draftId,
-                  query: args.query as unknown as EqlQuery,
-                  title: args.title,
-                  description: args.description,
-                }) as { query: EqlQuery },
-              ),
-            };
-          case "delete":
-            return {
-              method: args.method,
-              data: await deps.sdk.auto.deleteDraft(args.draftId as string),
-            };
-          case "convert":
-            return {
-              method: args.method,
-              data: await deps.sdk.auto.convertDraft(args.draftId as string),
-            };
-          default:
-            return {
-              method: "list",
-              data: await deps.sdk.auto.listDrafts(
-                pickDefined({
-                  status: args.status,
-                  search: args.search,
-                  limit: args.limit,
-                  offset: args.offset,
-                }),
-              ),
-            };
+        if (args.method === "get") {
+          return {
+            method: args.method,
+            data: await deps.sdk.auto.getDraft(args.draftId as string),
+          };
         }
+
+        return {
+          method: "list",
+          data: await deps.sdk.auto.listDrafts(
+            pickDefined({
+              status: args.status,
+              search: args.search,
+              limit: args.limit,
+              offset: args.offset,
+            }),
+          ),
+        };
       });
     },
   );

@@ -62,6 +62,39 @@ describe("server", () => {
     await server.close();
   });
 
+  it("titles every tool in its annotations and marks it either read-only or destructive", async () => {
+    const { client, server } = await connect();
+    const { tools } = await client.listTools();
+
+    for (const tool of tools) {
+      expect(tool.annotations?.title, tool.name).toBeTruthy();
+      expect(tool.annotations?.title, tool.name).toBe(tool.title);
+      const readOnly = tool.annotations?.readOnlyHint === true;
+      const destructive = tool.annotations?.destructiveHint === true;
+      expect(readOnly !== destructive, tool.name).toBe(true);
+    }
+
+    await server.close();
+  });
+
+  it("keeps draft reads and draft writes in separate tools", async () => {
+    const { client, server } = await connect();
+    const { tools } = await client.listTools();
+
+    const methods = (name: string) => {
+      const tool = tools.find((entry) => entry.name === name);
+      const schema = tool?.inputSchema as {
+        properties?: { method?: { enum?: string[] } };
+      };
+      return schema.properties?.method?.enum;
+    };
+
+    expect(methods("auto_draft")).toEqual(["list", "get"]);
+    expect(methods("auto_draft_write")).toEqual(["upsert", "delete", "convert"]);
+
+    await server.close();
+  });
+
   it("marks the write tools as not read-only", async () => {
     const { client, server } = await connect();
     const { tools } = await client.listTools();
@@ -71,7 +104,7 @@ describe("server", () => {
       .map((tool) => tool.name)
       .sort();
 
-    expect(writers).toEqual(["auto_draft", "auto_query_write"]);
+    expect(writers).toEqual(["auto_draft_write", "auto_query_write"]);
 
     await server.close();
   });
@@ -121,7 +154,7 @@ describe("server", () => {
 
     const calls = [
       { name: "auto_query_write", arguments: { method: "create", query: telegram } },
-      { name: "auto_draft", arguments: { method: "upsert", query: telegram } },
+      { name: "auto_draft_write", arguments: { method: "upsert", query: telegram } },
       { name: "auto_validate", arguments: { method: "query", query: signedWebhook } },
     ];
 
@@ -143,7 +176,7 @@ describe("server", () => {
       .map((tool) => tool.name)
       .sort();
 
-    expect(closed).toEqual(["api_status", "auto_query", "auto_validate"]);
+    expect(closed).toEqual(["api_status", "auto_draft", "auto_query", "auto_validate"]);
 
     await server.close();
   });

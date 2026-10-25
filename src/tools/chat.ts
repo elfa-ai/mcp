@@ -89,6 +89,7 @@ export function registerChat(server: McpServer, deps: Deps): RegisteredTool {
           ),
       },
       annotations: {
+        title: "Market chat",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,

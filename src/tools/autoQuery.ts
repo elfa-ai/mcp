@@ -50,6 +50,7 @@ export function registerAutoQuery(server: McpServer, deps: Deps): void {
         pollAfterSeconds: z.number().nullable(),
       },
       annotations: {
+        title: "Read Auto queries",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

@@ -65,6 +65,7 @@ export function registerCalls(server: McpServer, deps: Deps): RegisteredTool {
         ...pageOutput,
       },
       annotations: {
+        title: "Calls",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

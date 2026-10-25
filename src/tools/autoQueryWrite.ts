@@ -38,6 +38,7 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
         data: z.unknown(),
       },
       annotations: {
+        title: "Write Auto queries",
         readOnlyHint: false,
         destructiveHint: true,
         idempotentHint: false,

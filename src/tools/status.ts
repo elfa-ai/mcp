@@ -62,6 +62,7 @@ export function registerStatus(server: McpServer, deps: Deps): void {
         problem: z.string().nullable(),
       },
       annotations: {
+        title: "API key status",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

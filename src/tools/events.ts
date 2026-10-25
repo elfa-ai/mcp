@@ -133,6 +133,7 @@ export function registerEvents(server: McpServer, deps: Deps): RegisteredTool {
         ...pageOutput,
       },
       annotations: {
+        title: "Events",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
