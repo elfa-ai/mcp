@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "elfa",
   "version": "0.1.0",
-  "description": "Crypto social intelligence from X and Telegram, and Auto alerts that notify you when market or social conditions are met.",
+  "description": "Market context across crypto and equities from posts on X and Telegram, and Auto alerts that notify you when market or social conditions are met.",
   "author": {
     "name": "Elfa AI",
     "email": "support@elfa.ai",
@@ -13,6 +13,7 @@
   "license": "MIT",
   "keywords": [
     "crypto",
+    "equities",
     "social",
     "sentiment",
     "trending",
@@ -23,8 +24,8 @@
     "com.openai": {
       "interface": {
         "displayName": "Elfa",
-        "shortDescription": "Crypto social intelligence",
-        "longDescription": "Elfa tracks what crypto traders and researchers say on X and Telegram, and turns it into data you can ask about in chat.\n\nUse it to see which tokens are trending in social conversation, read the most engaged posts about a ticker or keyword, and get summaries of the narratives forming around the market. For questions metrics can't answer, Elfa's market chat writes analysis: macro overviews, token analysis and account analysis.\n\nAuto watches price, technical and social conditions for you and notifies you when they are met. You describe the condition in plain language, review the draft and its estimated cost, and only then activate it. Auto sends notifications and webhooks; it never places trades or moves funds.\n\nElfa is a research tool for crypto-literate users. It reports what people are saying and what the data shows, not financial advice. Social posts are third-party content and can be wrong or promotional. Sign in with your Elfa account; usage counts against that account's plan.",
+        "shortDescription": "Crypto and equity market intelligence",
+        "longDescription": "Elfa reads what traders and researchers post on X and Telegram and turns it into market context you can ask about in chat, across crypto and equities.\n\nUse it to find out what is happening around an asset and why: the events and storylines behind a move, where attention is shifting across the market, which positions accounts are taking and how their past calls performed. You can also see which tokens are trending in social conversation and read the most engaged posts about a ticker or keyword. For questions the data can't answer, Elfa's market chat writes analysis.\n\nAuto watches price, technical and social conditions for you and notifies you when they are met. You describe the condition in plain language, review the draft and its estimated cost, and only then activate it. Auto sends notifications and webhooks; it never places trades or moves funds.\n\nElfa is a research tool for market-literate users. It reports what people are saying and what the data shows, not financial advice. Social posts are third-party content and can be wrong or promotional. Sign in with your Elfa account; usage counts against that account's plan.",
         "developerName": "Elfa AI",
         "category": "Finance",
         "capabilities": [
@@ -36,8 +37,8 @@
         "privacyPolicyURL": "https://www.elfa.ai/privacy",
         "termsOfServiceURL": "https://www.elfa.ai/terms",
         "defaultPrompt": [
-          "Which tokens are trending on crypto Twitter today?",
-          "What are people saying about SOL in the last 24 hours?",
+          "What's driving ETH this week?",
+          "Which accounts are long SOL right now, and how have their calls done?",
           "Alert me when BTC drops below 90k."
         ],
         "composerIcon": "./assets/logo.png",
