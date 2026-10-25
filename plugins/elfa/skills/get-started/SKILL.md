@@ -9,10 +9,10 @@ Elfa gives market context across crypto and equities from posts on X and Telegra
 
 ## Research with the API v3 tools first
 
-1. `entities` turns a ticker, $cashtag, name, @handle or contract address into an entity id. It matches exactly, so check the name on the first row. Resolve once and reuse the id: `events` and `calls` filter by entity id, not ticker.
+1. `entities` turns a ticker, $cashtag, name or contract address into an entity id. It matches exactly, so check the name on the first row. Resolve once and reuse the id: `events` and `calls` filter by entity id, not ticker. To follow an X account, pass its handle to `calls` as `handle` instead.
 2. `events` for what is happening and why. `level=events` for single events, `level=storylines` for one development over days, `level=arcs` for a larger movement. Search by topic with `q` or filter by asset with `entityIds`.
 3. `market` for whole-market views with no asset needed: `view=mindshare` for where attention is going, `view=call_book` for the crowd's long/short lean, `view=trending_contracts` for contract addresses people are pasting. It reads crypto unless you set `market=equity`; `trending_contracts` is crypto only.
-4. `calls` for positions accounts take in their posts. `level=positioning` for open longs and shorts on one asset now, `level=episodes` for each position from open to close.
+4. `calls` for positions accounts take in their posts. `level=positioning` for open longs and shorts on one asset now, `level=episodes` for each position from open to close. Filter by token or equity ids from `entities`, or by `handle`.
 5. `top_accounts` for the accounts with the most standing, or the best track record as callers with `metric=alphaScore`.
 
 ## API v2 tools
