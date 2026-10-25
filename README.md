@@ -95,7 +95,7 @@ Not exposed as tools:
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
-- `getAccountSmartStats-v2` — The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. Use mentions with mode=search, which returns the posting account alongside each post's engagement metrics.
+- `getAccountSmartStats-v2` — The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. No tool returns its account-level figures; mentions with mode=search returns per-post engagement metrics with the posting account.
 
 <!-- tools:end -->
 

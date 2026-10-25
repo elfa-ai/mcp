@@ -9,7 +9,7 @@
 
 ### Removed
 
-- **`account_stats` is removed**; its API endpoint is retired on 28 October 2026. Use `mentions` with `mode=search`, which returns the posting account alongside each post's engagement metrics. The server instructions no longer mention it.
+- **`account_stats` is removed**; its API endpoint is retired on 28 October 2026. Until then the endpoint stays callable through the API and the SDKs, and 4.9.1 still has the tool. No tool replaces its account-level figures (follower and smart follower counts, average engagement and reach). `mentions` with `mode=search` returns per-post engagement metrics with the posting account, which covers judging an account from its recent posts. The server instructions no longer mention it.
 
 ## 4.9.1
 

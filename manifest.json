@@ -297,7 +297,7 @@
     {
       "operationId": "getAccountSmartStats-v2",
       "reason": "retired",
-      "note": "The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. Use mentions with mode=search, which returns the posting account alongside each post's engagement metrics."
+      "note": "The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. No tool returns its account-level figures; mentions with mode=search returns per-post engagement metrics with the posting account."
     }
   ]
 }
