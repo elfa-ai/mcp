@@ -54,6 +54,7 @@ export function registerNarratives(server: McpServer, deps: Deps): void {
         note: z.string().nullable(),
       },
       annotations: {
+        title: "Narratives",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

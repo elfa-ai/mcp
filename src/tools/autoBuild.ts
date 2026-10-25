@@ -34,6 +34,7 @@ export function registerAutoBuild(server: McpServer, deps: Deps): void {
         planIds: z.array(z.string()),
       },
       annotations: {
+        title: "Auto query builder",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: false,

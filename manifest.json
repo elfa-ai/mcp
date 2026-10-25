@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "4.9.1",
+    "version": "4.9.2",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": [
@@ -181,8 +181,24 @@
     },
     {
       "name": "auto_draft",
-      "title": "Auto drafts",
-      "summary": "Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query.",
+      "title": "Read Auto drafts",
+      "summary": "Read side of Auto drafts: list saved drafts and read one. Drafts are queries parked without activating; they never evaluate or fire.",
+      "credits": "Free",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "operations": [
+        "auto-list-query-drafts-v2",
+        "auto-get-query-draft-v2"
+      ]
+    },
+    {
+      "name": "auto_draft_write",
+      "title": "Write Auto drafts",
+      "summary": "Create, update, delete or activate an Auto draft. Converting a draft activates it as a live query that runs unattended.",
       "credits": "Free, except convert which costs the same as creating a query",
       "annotations": {
         "readOnlyHint": false,
@@ -191,8 +207,6 @@
         "openWorldHint": false
       },
       "operations": [
-        "auto-list-query-drafts-v2",
-        "auto-get-query-draft-v2",
         "auto-upsert-query-draft-v2",
         "auto-delete-query-draft-v2",
         "auto-convert-query-draft-v2"
@@ -249,21 +263,6 @@
       ]
     },
     {
-      "name": "account_stats",
-      "title": "Account stats",
-      "summary": "Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026.",
-      "credits": "1 per call",
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": false
-      },
-      "operations": [
-        "getAccountSmartStats-v2"
-      ]
-    },
-    {
       "name": "market_chat",
       "title": "Market chat",
       "summary": "Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis.",
@@ -294,6 +293,11 @@
       "operationId": "auto-stream-query-v2",
       "reason": "sse",
       "note": "Long lived streams have no tool equivalent. Poll with auto_query."
+    },
+    {
+      "operationId": "getAccountSmartStats-v2",
+      "reason": "retired",
+      "note": "The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. No tool returns its account-level figures; mentions with mode=search returns per-post engagement metrics with the posting account."
     }
   ]
 }

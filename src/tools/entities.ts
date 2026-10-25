@@ -32,6 +32,7 @@ export function registerEntities(server: McpServer, deps: Deps): RegisteredTool 
         hasMore: z.boolean(),
       },
       annotations: {
+        title: "Entities",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

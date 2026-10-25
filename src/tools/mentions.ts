@@ -81,6 +81,7 @@ export function registerMentions(server: McpServer, deps: Deps): void {
         mentions: z.array(z.record(z.unknown())),
       },
       annotations: {
+        title: "Mentions",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

@@ -38,4 +38,4 @@ Auto watches conditions and notifies the user. It never trades.
 4. Use `notify` actions, or a `webhook` the user gives you. Never ask for or pass a Telegram bot token or a webhook signing secret: the server refuses queries that carry one.
 5. Check on a query with `auto_query` (`method=get`), waiting `pollAfterSeconds` between calls. Cancel with `auto_query_write` `method=cancel`.
 
-Use `auto_draft` to save a query the user is still deciding on, without activating it.
+Use `auto_draft_write` (`method=upsert`) to save a query the user is still deciding on, without activating it, and `auto_draft` to list or read saved drafts.

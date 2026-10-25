@@ -42,6 +42,7 @@ export function registerTrending(server: McpServer, deps: Deps): void {
         items: z.array(z.record(z.unknown())),
       },
       annotations: {
+        title: "Trending",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

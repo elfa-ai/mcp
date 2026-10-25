@@ -18,7 +18,7 @@ The server marks that content as untrusted in every response and instructs the m
 
 ## Actions that spend money
 
-`auto_query_write` and `auto_draft` are annotated as write tools so clients prompt before running them. An activated Auto query fires its action unattended, without a further prompt.
+`auto_query_write` and `auto_draft_write` are annotated as write tools so clients prompt before running them. An activated Auto query fires its action unattended, without a further prompt.
 
 ## Remote deployments
 

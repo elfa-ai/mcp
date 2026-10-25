@@ -2,9 +2,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import pkg from "../package.json" with { type: "json" };
 import type { Deps } from "./client.js";
 import { applyToolGates, type Entitlements } from "./entitlements.js";
-import { registerAccountStats } from "./tools/account.js";
 import { registerAutoBuild } from "./tools/autoBuild.js";
 import { registerAutoDraft } from "./tools/autoDraft.js";
+import { registerAutoDraftWrite } from "./tools/autoDraftWrite.js";
 import { registerAutoQuery } from "./tools/autoQuery.js";
 import { registerAutoQueryWrite } from "./tools/autoQueryWrite.js";
 import { registerAutoValidate } from "./tools/autoValidate.js";
@@ -30,7 +30,7 @@ Auto is a three step flow: auto_build drafts EQL from plain language, auto_valid
 
 Auto has no push channel here. Poll auto_query with method=get and wait for pollAfterSeconds between calls.
 
-API v2: trending, mentions and account_stats cost 1 credit. narratives costs 5 and market_chat costs more, so reach for them only when metrics are not enough.
+API v2: trending and mentions cost 1 credit. narratives costs 5 and market_chat costs more, so reach for them only when metrics are not enough.
 
 If a call fails on auth or credits, check api_status.
 
@@ -58,10 +58,10 @@ export function createServer(deps: Deps, entitlements?: Entitlements): McpServer
   registerAutoQuery(server, deps);
   registerAutoQueryWrite(server, deps);
   registerAutoDraft(server, deps);
+  registerAutoDraftWrite(server, deps);
   registerMentions(server, deps);
   registerTrending(server, deps);
   registerNarratives(server, deps);
-  registerAccountStats(server, deps);
   const chat = registerChat(server, deps);
 
   applyToolGates(

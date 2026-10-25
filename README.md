@@ -83,11 +83,11 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 | `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue. |
 | `auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
 | `auto_query_write` | write | 5 plus LLM usage to create, free to cancel or delete | Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met. |
-| `auto_draft` | write | Free, except convert which costs the same as creating a query | Manage inactive Auto drafts. Drafts do not evaluate until converted into an active query. |
+| `auto_draft` | read | Free | Read side of Auto drafts: list saved drafts and read one. Drafts are queries parked without activating; they never evaluate or fire. |
+| `auto_draft_write` | write | Free, except convert which costs the same as creating a query | Create, update, delete or activate an Auto draft. Converting a draft activates it as a live query that runs unattended. |
 | `mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets. |
 | `trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
 | `narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
-| `account_stats` | read | 1 per call | Smart follower and engagement stats for an X account. Legacy: it still works, but will be removed on 28 October 2026. |
 | `market_chat` | read | Varies by speed | Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis. |
 
 Not exposed as tools:
@@ -95,6 +95,7 @@ Not exposed as tools:
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
+- `getAccountSmartStats-v2` — The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. No tool returns its account-level figures; mentions with mode=search returns per-post engagement metrics with the posting account.
 
 <!-- tools:end -->
 

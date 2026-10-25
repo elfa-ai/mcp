@@ -65,11 +65,6 @@ describe("sparse API payloads", () => {
     expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
   });
 
-  it("account stats with a sparse body", async () => {
-    const sdk = { getAccountSmartStats: async () => ({ success: true, data: {} }) };
-    const r = await call(sdk, "account_stats", { username: "@x" });
-    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
-  });
 
   it("status when the key call fails", async () => {
     const sdk = { ping: async () => ({}), getApiKeyStatus: async () => { throw new Error("401"); } };

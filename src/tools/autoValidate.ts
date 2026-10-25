@@ -47,6 +47,7 @@ export function registerAutoValidate(server: McpServer, deps: Deps): void {
         tweetAccounts: z.array(z.record(z.unknown())),
       },
       annotations: {
+        title: "Validate Auto query",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

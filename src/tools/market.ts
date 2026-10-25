@@ -61,6 +61,7 @@ export function registerMarket(server: McpServer, deps: Deps): RegisteredTool {
         ...pageOutput,
       },
       annotations: {
+        title: "Market",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,

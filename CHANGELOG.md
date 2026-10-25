@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.9.2
+
+### Changed
+
+- **`auto_draft` is split into `auto_draft` (read) and `auto_draft_write` (create, update, delete, convert)** so read and write operations are separate tools, as with `auto_query` and `auto_query_write`. `auto_draft` now takes `method=list` or `method=get` and is annotated read-only and closed world, since it only reads the caller's own drafts. `auto_draft_write` takes `method=upsert`, `delete` or `convert`, is annotated destructive, and still refuses a query that carries a credential on upsert.
+- Every tool carries its title in `annotations.title` as well as the top-level `title`, for clients that read the title from the annotations.
+
+### Removed
+
+- **`account_stats` is removed**; its API endpoint is retired on 28 October 2026. Until then the endpoint stays callable through the API and the SDKs, and 4.9.1 still has the tool. No tool replaces its account-level figures (follower and smart follower counts, average engagement and reach). `mentions` with `mode=search` returns per-post engagement metrics with the posting account, which covers judging an account from its recent posts. The server instructions no longer mention it.
+
 ## 4.9.1
 
 ### Changed

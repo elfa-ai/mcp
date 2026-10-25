@@ -29,6 +29,7 @@ export function registerTopAccounts(server: McpServer, deps: Deps): RegisteredTo
         hasMore: z.boolean(),
       },
       annotations: {
+        title: "Top accounts",
         readOnlyHint: true,
         destructiveHint: false,
         idempotentHint: true,
