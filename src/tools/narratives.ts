@@ -10,7 +10,7 @@ export function registerNarratives(server: McpServer, deps: Deps): void {
     {
       title: "Narratives",
       description:
-        "Written narrative analysis with source links, for when counts are not enough. 5 credits per call, so prefer trending or mentions when metrics will do. scope=market extracts the narratives moving the market. scope=keywords summarises events for keywords you supply, and can take over a minute to return.",
+        "Written narrative analysis with source links, for when counts are not enough. 5 credits per call. scope=market extracts the narratives moving the market. scope=keywords summarises events for keywords you supply, and can take over a minute to return.",
       inputSchema: {
         scope: z
           .enum(["market", "keywords"])

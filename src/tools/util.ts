@@ -54,7 +54,7 @@ export const repostsArg = z
 export const eqlQueryArg = z
   .record(z.unknown())
   .describe(
-    "EQL query object with conditions, actions and expiresIn. Build it with auto_build and check it with auto_validate first. Use notify or webhook actions: a query carrying a credential, such as a telegram_bot botToken or a webhook signingSecret, is refused.",
+    "EQL query as a JSON object, not a string, with conditions, actions and expiresIn. auto_build drafts one inside its response text. Actions are notify or webhook: a query carrying a credential, such as a telegram_bot botToken or a webhook signingSecret, is refused.",
   );
 
 export const v3FromArg = z

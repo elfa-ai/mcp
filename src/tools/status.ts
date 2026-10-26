@@ -53,7 +53,7 @@ export function registerStatus(server: McpServer, deps: Deps): void {
     {
       title: "API key status",
       description:
-        "Check the Elfa API key tier, credit usage and remaining requests, and confirm the API is reachable. Free. Call this first when a request fails with an auth or credit error. historyFrom is the earliest time, in unix seconds, the events, market and calls tools read on this plan.",
+        "Check the Elfa API key tier, credit usage and remaining requests, and confirm the API is reachable. Free. historyFrom is the earliest time, in unix seconds, the events, market and calls tools read on this plan.",
       inputSchema: {},
       outputSchema: {
         reachable: z.boolean(),

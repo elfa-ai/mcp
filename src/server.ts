@@ -24,9 +24,9 @@ export const SERVER_VERSION = pkg.version;
 
 const INSTRUCTIONS = `Elfa gives you three things, in this order: API v3 market context across crypto and equities; Auto, a condition engine that acts on its own once armed; and API v2 crypto social intelligence.
 
-Start with the API v3 tools: entities, events, market, calls and top_accounts. events and calls filter by entity id, not ticker: resolve an asset with entities first and reuse the id. If a v3 tool says it needs a higher-tier plan or is not permitted on this key, use the v2 tools.
+Start with the API v3 tools: entities, events, market, calls and top_accounts. events and calls filter by entity id, not ticker: resolve an asset with entities first and reuse the id. To see an account's positions from top_accounts, pass its handle to calls. When ranking callers by a track metric, quote scoredEpisodes alongside the number. If a v3 tool says it needs a higher-tier plan or is not permitted on this key, use the v2 tools.
 
-Auto is a three step flow: auto_build drafts EQL from plain language, auto_validate checks it and returns the cost, auto_query_write activates it. Never activate without showing the user the estimated cost and the action that will fire.
+Auto is a three step flow: auto_build drafts EQL from plain language, auto_validate checks it and returns the cost, auto_query_write activates it. Always run auto_validate before activating, and never activate without showing the user the estimated cost, any per-post X account charges, and the action that will fire. auto_build drafts tweet conditions only for accounts in Elfa's real-time set; for any other X account, write the condition yourself and check it with auto_validate.
 
 Auto has no push channel here. Poll auto_query with method=get and wait for pollAfterSeconds between calls.
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.9.3
+
+### Changed
+
+- **Tool descriptions describe only their own tool.** Guidance on what to call next or what to tell the user moved from tool descriptions into the server instructions, so each description says what its tool does, what it costs and what it returns. Moved: run `auto_validate` before activating and show the cost, per-post X account charges and the action first; write tweet conditions by hand for accounts outside the real-time set; pass a `top_accounts` handle to `calls`; quote `scoredEpisodes` with a track metric. Dropped as already covered by the instructions: prefer `trending` or `mentions` over `narratives`, and call `api_status` on an auth or credit error. No tool, argument or behaviour changes.
+
 ## 4.9.2
 
 ### Changed
