@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 4.10.0
 
 ### Added
 
@@ -9,7 +9,8 @@
 
 ### Changed
 
-- **API v3 is open to every plan and billed in credits from 1 November 2026.** The v3 tools' cost column in the README and `manifest.json` gives each endpoint's price from the published pricing page in place of "Free on PAYG and Grow until 31 Oct 2026", and the README and installation guide no longer say v3 needs a paid plan.
+- **API v3 is open to every plan and billed in credits.** The v3 tools' cost column in the README and `manifest.json` gives each endpoint's price from the published pricing page, and the README and installation guide no longer say v3 needs a paid plan.
+- **`getAccountSmartStats-v2` is listed as deprecated and not maintained**, with `top_accounts` as the way to rank accounts.
 - **A `429` that means the key is out of credits says so.** `ERR_RATE_LIMITED` (plan credits or spend cap used up) now reads as out of credits, retrying will not help; `ERR_RATE_LIMIT_EXCEEDED` (the per-minute limit) still says to wait for the reset.
 - `swagger.json` is the published 3.4.2 spec.
 

@@ -74,11 +74,11 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 | Tool | Mode | Cost | What it does |
 | --- | --- | --- | --- |
 | `api_status` | read | Free | Check API key tier, credit usage and remaining requests, and historyFrom, how far back events, market and calls read. Also confirms the API is reachable. |
-| `entities` | read | From 1 Nov 2026: 1 per call | Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search. |
-| `events` | read | From 1 Nov 2026: 1, plus 1 per event or 2 per storyline or arc | What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic. |
-| `market` | read | From 1 Nov 2026: call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50 | Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them. |
-| `calls` | read | From 1 Nov 2026: 1, plus 1 per call or 2 per episode; positioning 2 | Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now. |
-| `top_accounts` | read | From 1 Nov 2026: 5 by standing, 25 by a track metric, doubled for limit over 50 | X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn). |
+| `entities` | read | 1 per call | Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search. |
+| `events` | read | 1, plus 1 per event or 2 per storyline or arc | What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic. |
+| `market` | read | call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50 | Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them. |
+| `calls` | read | 1, plus 1 per call or 2 per episode; positioning 2 | Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now. |
+| `top_accounts` | read | 5 by standing, 25 by a track metric, doubled for limit over 50 | X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn). |
 | `auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
 | `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue. |
 | `auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
@@ -95,7 +95,7 @@ Not exposed as tools:
 - `chat-stream-v2` — A tool call returns one result, so streaming adds nothing. market_chat covers the same analysis.
 - `auto-stream-queries-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
 - `auto-stream-query-v2` — Long lived streams have no tool equivalent. Poll with auto_query.
-- `getAccountSmartStats-v2` — The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. No tool returns its account-level figures; mentions with mode=search returns per-post engagement metrics with the posting account.
+- `getAccountSmartStats-v2` — Deprecated and not maintained, so no tool wraps it. To rank accounts, use top_accounts; mentions with mode=search returns per-post engagement metrics with the posting account.
 
 <!-- tools:end -->
 
@@ -105,7 +105,7 @@ Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/tools
 
 ### API v3
 
-`entities`, `events`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/api/v3/overview): events, storylines and arcs; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. From 1 November 2026 each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/get-started/pricing#api-v3).
+`entities`, `events`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/api/v3/overview): events, storylines and arcs; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/get-started/pricing#api-v3).
 
 - Filters take entity ids, not tickers. Resolve an asset with `entities` first and reuse the id.
 - Times are unix seconds. Milliseconds are refused.

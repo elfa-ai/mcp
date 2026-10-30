@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "4.9.3",
+    "version": "4.10.0",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": [
@@ -31,7 +31,7 @@
       "name": "entities",
       "title": "Entities",
       "summary": "Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search.",
-      "credits": "From 1 Nov 2026: 1 per call",
+      "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -46,7 +46,7 @@
       "name": "events",
       "title": "Events",
       "summary": "What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic.",
-      "credits": "From 1 Nov 2026: 1, plus 1 per event or 2 per storyline or arc",
+      "credits": "1, plus 1 per event or 2 per storyline or arc",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -63,7 +63,7 @@
       "name": "market",
       "title": "Market",
       "summary": "Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them.",
-      "credits": "From 1 Nov 2026: call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50",
+      "credits": "call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -82,7 +82,7 @@
       "name": "calls",
       "title": "Calls",
       "summary": "Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now.",
-      "credits": "From 1 Nov 2026: 1, plus 1 per call or 2 per episode; positioning 2",
+      "credits": "1, plus 1 per call or 2 per episode; positioning 2",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -99,7 +99,7 @@
       "name": "top_accounts",
       "title": "Top accounts",
       "summary": "X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn).",
-      "credits": "From 1 Nov 2026: 5 by standing, 25 by a track metric, doubled for limit over 50",
+      "credits": "5 by standing, 25 by a track metric, doubled for limit over 50",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -296,8 +296,8 @@
     },
     {
       "operationId": "getAccountSmartStats-v2",
-      "reason": "retired",
-      "note": "The API retires this endpoint on 28 October 2026, so the account_stats tool is removed. No tool returns its account-level figures; mentions with mode=search returns per-post engagement metrics with the posting account."
+      "reason": "deprecated",
+      "note": "Deprecated and not maintained, so no tool wraps it. To rank accounts, use top_accounts; mentions with mode=search returns per-post engagement metrics with the posting account."
     }
   ]
 }
