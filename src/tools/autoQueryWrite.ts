@@ -10,7 +10,7 @@ export function registerAutoQueryWrite(server: McpServer, deps: Deps): void {
     {
       title: "Write Auto queries",
       description:
-        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again. Per-post X accounts in its tweet conditions are billed on top while it runs.",
+        "Activate, cancel or delete an Auto query. Creating costs 5 credits plus LLM usage, cancel and delete are free. An activated query runs unattended and fires its action without asking again. Per-post X accounts in its tweet conditions and per-day accounts in its x_follow_made or x_follow_overlap conditions are billed on top while it runs.",
       inputSchema: {
         method: z
           .enum(["create", "cancel", "delete"])

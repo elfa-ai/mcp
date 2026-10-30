@@ -99,7 +99,7 @@ Not exposed as tools:
 
 <!-- tools:end -->
 
-Some tools depend on the plan: today `market_chat`, which needs a higher-tier plan than the free one. At startup (stdio) or per request (HTTP, cached for a minute per key), the server reads the key's scopes from `/v2/key-status`. A tool the plan doesn't include stays listed, but its description says it needs a higher-tier plan, and calling it returns the upgrade link without calling the API or spending credits. If the scopes can't be read within 3 seconds, every tool is listed as usual and the API decides.
+Some tools depend on the plan: today `market_chat`, which needs a higher-tier plan than the free one, and the API v3 tools on a key whose scopes leave them out. At startup (stdio) or per request (HTTP, cached for a minute per key), the server reads the key's scopes from `/v2/key-status`. A tool the plan doesn't include stays listed, but its description says it needs a higher-tier plan, and calling it returns the upgrade link without calling the API or spending credits. If the scopes can't be read within 3 seconds, every tool is listed as usual and the API decides.
 
 Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/tools/sdks) for applications that can consume SSE.
 

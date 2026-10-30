@@ -54,7 +54,7 @@ async function errorFrom(response: Response): Promise<V3ApiError> {
     message += ` ${JSON.stringify(body.details)}`;
   }
   const reset = response.headers.get("RateLimit-Reset");
-  if (response.status === 429 && reset) message += `. Resets in ${reset} seconds`;
+  if (response.status === 429 && reset && body?.code !== "ERR_RATE_LIMITED") message += `. Resets in ${reset} seconds`;
   const requestId =
     typeof body?.requestId === "string" ? body.requestId : response.headers.get("x-request-id");
   if (requestId) message += ` (requestId ${requestId})`;

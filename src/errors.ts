@@ -52,7 +52,7 @@ export function describeError(error: unknown): string {
       return `No longer available: ${detail}. The resource has finished its lifecycle, re-read the current state instead of retrying.`;
     case 429:
       if (codeOf(error) === "ERR_RATE_LIMITED") {
-        return `Out of credits: ${detail}. This key's plan credits or spend cap are used up, so retrying will not help until it has more.`;
+        return `Out of credits: ${detail}. This key's plan credits, maximum overage or spend cap are used up, so retrying will not help until it has more.`;
       }
       return `Rate limited: ${detail}. Wait for any reset time named above, then retry with fewer, wider requests.`;
     default:

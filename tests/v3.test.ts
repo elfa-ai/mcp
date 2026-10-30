@@ -105,11 +105,13 @@ describe("v3 client", () => {
       vi.fn(async () =>
         new Response(JSON.stringify({ code: "ERR_RATE_LIMITED", message: "Out of credits" }), {
           status: 429,
+          headers: { "RateLimit-Reset": "42" },
         }),
       ),
     );
     const spent = await client.get("/v3/events").catch((e: unknown) => e);
     expect(describeError(spent)).toContain("retrying will not help");
+    expect(describeError(spent)).not.toContain("Resets in");
 
     vi.stubGlobal(
       "fetch",
