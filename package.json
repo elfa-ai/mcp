@@ -59,7 +59,7 @@
   "homepage": "https://docs.elfa.ai",
   "dependencies": {
     "@elfa-ai/sdk": "^3.0.1",
-    "@modelcontextprotocol/sdk": "^1.20.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "express": "^5.1.0",
     "zod": "^3.25.0"
   },

@@ -44,7 +44,7 @@ Mentions, news, narratives and events return third-party social text, or summari
 export function createServer(deps: Deps, entitlements?: Entitlements): McpServer {
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
-    { instructions: INSTRUCTIONS },
+    { instructions: INSTRUCTIONS, maxToolInputElements: 10_000 },
   );
 
   registerStatus(server, deps);
