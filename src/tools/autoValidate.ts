@@ -13,7 +13,7 @@ export function registerAutoValidate(server: McpServer, deps: Deps): void {
     {
       title: "Validate Auto query",
       description:
-        "Check EQL syntax and get the estimated cost of activating a query. Free. tweetAccounts lists the X account behind each tweet condition: billing=per_post accounts cost creditsPerPost for every post from the account (not replies or reposts), matched or not, while the query runs, on top of estimatedCredits. Pass either an inline query or a draftId. method=symbol instead checks that a symbol has market data on a venue, which price and ta conditions need.",
+        "Check EQL syntax and get the estimated cost of activating a query. Free. tweetAccounts lists the X account behind each tweet condition: billing=per_post accounts cost creditsPerPost for every post from the account (not replies or reposts), matched or not, while the query runs, on top of estimatedCredits. followAccounts lists the X account behind each x_follow_made or x_follow_overlap condition: billing=per_day accounts cost creditsPerDay for each UTC day their follows are read while the query runs, also on top of estimatedCredits. Pass either an inline query or a draftId. method=symbol instead checks that a symbol has market data on a venue, which price and ta conditions need.",
       inputSchema: {
         method: z
           .enum(["query", "symbol"])
@@ -45,6 +45,7 @@ export function registerAutoValidate(server: McpServer, deps: Deps): void {
         warnings: z.array(z.unknown()),
         estimatedCredits: z.number().nullable(),
         tweetAccounts: z.array(z.record(z.unknown())),
+        followAccounts: z.array(z.record(z.unknown())),
       },
       annotations: {
         title: "Validate Auto query",
@@ -77,6 +78,7 @@ export function registerAutoValidate(server: McpServer, deps: Deps): void {
             warnings: [],
             estimatedCredits: null,
             tweetAccounts: [],
+            followAccounts: [],
           };
         });
       }
@@ -106,6 +108,9 @@ export function registerAutoValidate(server: McpServer, deps: Deps): void {
           estimatedCredits: response.estimatedCredits ?? null,
           tweetAccounts: asArray<Record<string, unknown>>(
             (response as { tweetAccounts?: unknown }).tweetAccounts,
+          ),
+          followAccounts: asArray<Record<string, unknown>>(
+            (response as { followAccounts?: unknown }).followAccounts,
           ),
         };
       });

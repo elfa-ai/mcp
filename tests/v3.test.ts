@@ -102,6 +102,17 @@ describe("v3 client", () => {
 
     vi.stubGlobal(
       "fetch",
+      vi.fn(async () =>
+        new Response(JSON.stringify({ code: "ERR_RATE_LIMITED", message: "Out of credits" }), {
+          status: 429,
+        }),
+      ),
+    );
+    const spent = await client.get("/v3/events").catch((e: unknown) => e);
+    expect(describeError(spent)).toContain("retrying will not help");
+
+    vi.stubGlobal(
+      "fetch",
       vi.fn(async () => {
         throw new DOMException("The operation was aborted due to timeout", "TimeoutError");
       }),
