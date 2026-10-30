@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.10.0
+
+### Added
+
+- **`market_chat` takes `useMemory`.** `true` lets the request read and add to the saved memory of the Elfa account that owns the API key. Omitted, the request neither reads nor writes memory, which is now the API's default for every chat request. Leave it off when one key serves many people.
+- **`auto_validate` returns `followAccounts`**: the X account behind each `x_follow_made` or `x_follow_overlap` condition and how it is billed. `billing=per_day` accounts cost `creditsPerDay` for each UTC day their follows are read, on top of `estimatedCredits`. The server instructions ask agents to show these charges before activating, as they already do for per-post X account charges, and the `auto_query_write` description names them.
+
+### Changed
+
+- **API v3 is open to every plan and billed in credits.** The v3 tools' cost column in the README and `manifest.json` gives each endpoint's price from the published pricing page, and the README and installation guide no longer say v3 needs a paid plan.
+- **`getAccountSmartStats-v2` is listed as deprecated and not maintained**, with `top_accounts` as the way to rank accounts.
+- **A `429` that means the key is out of credits says so.** `ERR_RATE_LIMITED` (plan credits, maximum overage or spend cap used up) now reads as out of credits, retrying will not help, and leaves out the reset time; `ERR_RATE_LIMIT_EXCEEDED` (the per-minute limit) still says to wait for the reset.
+- `swagger.json` is the published 3.4.2 spec.
+
 ## 4.9.3
 
 ### Changed

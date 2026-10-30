@@ -71,6 +71,12 @@ export function registerChat(server: McpServer, deps: Deps): RegisteredTool {
           .string()
           .optional()
           .describe("X username, for analysisType=accountAnalysis."),
+        useMemory: z
+          .boolean()
+          .optional()
+          .describe(
+            "true lets the request read and add to the saved memory of the Elfa account that owns the API key. Omitted, it neither reads nor writes memory. Leave it off when one key serves many people.",
+          ),
       },
       outputSchema: {
         message: z.string(),
@@ -125,8 +131,8 @@ export function registerChat(server: McpServer, deps: Deps): RegisteredTool {
       });
 
       return run(deps, async () => {
-        // includeSources (API 2.8.1) is newer than the SDK's ChatParams type;
-        // the SDK posts params unchanged, so the flag reaches /v2/chat.
+        // includeSources (API 2.8.1) and useMemory (API 3.3.0) are newer than the
+        // SDK's ChatParams type; the SDK posts params unchanged, so both reach /v2/chat.
         const response = await deps.sdk.chat(
           pickDefined({
             analysisType: type,
@@ -136,6 +142,7 @@ export function registerChat(server: McpServer, deps: Deps): RegisteredTool {
             assetMetadata:
               Object.keys(assetMetadata).length > 0 ? assetMetadata : undefined,
             includeSources: true,
+            useMemory: args.useMemory,
           }) as Parameters<Deps["sdk"]["chat"]>[0],
         );
         const data = response.data as typeof response.data & { sources?: unknown };

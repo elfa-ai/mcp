@@ -40,6 +40,9 @@ describe("errors", () => {
     expect(describeError({ statusCode: 429, message: "slow down" })).toContain(
       "retry with fewer",
     );
+    expect(
+      describeError({ statusCode: 429, message: "out", details: { code: "ERR_RATE_LIMITED" } }),
+    ).toContain("retrying will not help");
     expect(describeError({ statusCode: 410, message: "stream closed" })).toContain(
       "No longer available",
     );

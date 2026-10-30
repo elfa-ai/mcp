@@ -21,6 +21,7 @@ export class V3ApiError extends Error {
   constructor(
     message: string,
     readonly statusCode: number,
+    readonly details?: { code?: unknown } | null,
   ) {
     super(message);
   }
@@ -43,6 +44,7 @@ export function queryString(params: V3Params): string {
 async function errorFrom(response: Response): Promise<V3ApiError> {
   let message = response.statusText || `HTTP ${response.status}`;
   const body = (await response.json().catch(() => null)) as {
+    code?: unknown;
     message?: unknown;
     details?: unknown;
     requestId?: unknown;
@@ -52,11 +54,11 @@ async function errorFrom(response: Response): Promise<V3ApiError> {
     message += ` ${JSON.stringify(body.details)}`;
   }
   const reset = response.headers.get("RateLimit-Reset");
-  if (response.status === 429 && reset) message += `. Resets in ${reset} seconds`;
+  if (response.status === 429 && reset && body?.code !== "ERR_RATE_LIMITED") message += `. Resets in ${reset} seconds`;
   const requestId =
     typeof body?.requestId === "string" ? body.requestId : response.headers.get("x-request-id");
   if (requestId) message += ` (requestId ${requestId})`;
-  return new V3ApiError(message, response.status);
+  return new V3ApiError(message, response.status, body);
 }
 
 function retryable(error: unknown): boolean {

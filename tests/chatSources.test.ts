@@ -5,14 +5,17 @@ import { createServer } from "../src/server.js";
 import type { Deps } from "../src/client.js";
 import { readSources } from "../src/tools/chat.js";
 
-async function callChat(chat: (params: unknown) => Promise<unknown>) {
+async function callChat(
+  chat: (params: unknown) => Promise<unknown>,
+  extra: Record<string, unknown> = {},
+) {
   const [ct, st] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "probe", version: "1.0.0" });
   const server = createServer({ sdk: { chat } as unknown as Deps["sdk"], v3: { get: async () => ({}) }, maxResponseChars: 60000 });
   await Promise.all([client.connect(ct), server.connect(st)]);
   const result = await client.callTool({
     name: "market_chat",
-    arguments: { message: "what is X saying about SOL ETFs?" },
+    arguments: { message: "what is X saying about SOL ETFs?", ...extra },
   });
   await server.close();
   return result;
@@ -79,5 +82,15 @@ describe("readSources", () => {
   it("returns [] for a non-array", () => {
     expect(readSources(undefined)).toEqual([]);
     expect(readSources({ url: "x" })).toEqual([]);
+  });
+});
+
+describe("market_chat memory", () => {
+  it("sends useMemory only when the agent sets it", async () => {
+    const chat = vi.fn(async (_params: unknown) => ({ success: true, data: { message: "a", sessionId: "s" } }));
+    await callChat(chat);
+    expect(chat).toHaveBeenLastCalledWith(expect.not.objectContaining({ useMemory: expect.anything() }));
+    await callChat(chat, { useMemory: true });
+    expect(chat).toHaveBeenLastCalledWith(expect.objectContaining({ useMemory: true }));
   });
 });

@@ -4,12 +4,19 @@ interface StatusCarrier {
   statusCode?: number;
   status?: number;
   message?: string;
+  details?: { code?: unknown } | null;
 }
 
 function statusOf(error: unknown): number | undefined {
   if (typeof error !== "object" || error === null) return undefined;
   const candidate = error as StatusCarrier;
   return candidate.statusCode ?? candidate.status;
+}
+
+function codeOf(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null) return undefined;
+  const code = (error as StatusCarrier).details?.code;
+  return typeof code === "string" ? code : undefined;
 }
 
 function messageOf(error: unknown): string {
@@ -44,6 +51,9 @@ export function describeError(error: unknown): string {
     case 410:
       return `No longer available: ${detail}. The resource has finished its lifecycle, re-read the current state instead of retrying.`;
     case 429:
+      if (codeOf(error) === "ERR_RATE_LIMITED") {
+        return `Out of credits: ${detail}. This key's plan credits, maximum overage or spend cap are used up, so retrying will not help until it has more.`;
+      }
       return `Rate limited: ${detail}. Wait for any reset time named above, then retry with fewer, wider requests.`;
     default:
       break;

@@ -50,7 +50,16 @@ describe("sparse API payloads", () => {
     ];
     const sdk = { auto: { validateQuery: async () => ({ valid: true, errors: [], warnings: [], estimatedCredits: 0, tweetAccounts }) } };
     const r = await call(sdk, "auto_validate", { query: { conditions: {}, actions: [], expiresIn: "24h" } });
-    expect(r.structuredContent).toEqual({ valid: true, errors: [], warnings: [], estimatedCredits: 0, tweetAccounts });
+    expect(r.structuredContent).toEqual({ valid: true, errors: [], warnings: [], estimatedCredits: 0, tweetAccounts, followAccounts: [] });
+  });
+
+  it("validate returns the follow accounts and their billing", async () => {
+    const followAccounts = [
+      { path: "conditions[0]", username: "nasa", accountSourceRefId: "11348282", billing: "per_day", creditsPerDay: 1 },
+    ];
+    const sdk = { auto: { validateQuery: async () => ({ valid: true, errors: [], warnings: [], estimatedCredits: 0, followAccounts }) } };
+    const r = await call(sdk, "auto_validate", { query: { conditions: {}, actions: [], expiresIn: "24h" } });
+    expect(r.structuredContent).toEqual({ valid: true, errors: [], warnings: [], estimatedCredits: 0, tweetAccounts: [], followAccounts });
   });
 
   it("narratives when the payload is empty", async () => {
