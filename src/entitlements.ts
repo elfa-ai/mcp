@@ -23,6 +23,8 @@ export const TOOL_GATES: Readonly<Record<string, ToolGate>> = {
   market_chat: { scopes: ["chat"] },
   entities: { scopes: ["entities", "entities/*"] },
   events: { scopes: ["events", "events/*", "events/storylines", "events/arcs"] },
+  calendar: { scopes: ["events/calendar", "events/*"] },
+  prediction_markets: { scopes: ["events/prediction-markets", "events/*"] },
   market: {
     scopes: [
       "market/crypto/call-book",

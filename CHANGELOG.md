@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.11.0
+
+### Added
+
+- **`calendar` reads what is scheduled** across crypto, equities and macro: launches, unlocks, votes, listings, earnings, data releases, rate decisions, hearings, conferences and deadlines, soonest first with a cursor. With no range it reads ahead from 00:00 UTC today for 30 days. Filter by `entityIds`, `assetClass`, `category`, `status`, `confidence` and `minImportance`; `80` keeps the key dates. Each entry has its `startsAt`, `precision` (`exact`, or `day` with a `date`), `status`, `importance`, `confidence`, the entities it is about and the `eventIds` and `storylineIds` that reported the date, and once it is over, an `outcome`. It costs 1 credit plus 1 per entry not already billed that UTC day.
+- **`prediction_markets` returns the open Polymarket and Kalshi markets** that up to 30 events, storylines or arcs bear on, with each market's `provider`, `marketId`, title, link, close time, the `eventIds` behind it, and `move`: one outcome's odds an hour before and after a story's first post, and whether the move was unusual. Free for now.
+- **`auto_query` `method=executions` takes `after`** to read every execution once, oldest first: pass `start`, then each page's `pagination.nextCursor`. `hasMore: false` means none are ready yet, so poll again later. `offset` is not sent with `after`, which the API refuses alongside `offset` or `status`.
+
+### Changed
+
+- `calendar` and `prediction_markets` are plan-gated like the other API v3 tools: on a key whose scopes leave one out, it is listed as needing a higher-tier plan. The server instructions, the README and the installation guide list them with the other API v3 tools, and the plugin's get-started skill adds them to the research steps.
+- **Auto read and draft calls state their cost.** `auto_query` `method=list`, `executions` and `execution`, every `auto_draft` call, and `auto_draft_write` `upsert` and `delete` cost 1 credit each, as the published Auto pricing lists them; they were described as free. `method=get`, `sessions` and `session`, `auto_validate`, and cancelling or deleting a query stay free. `auto_query_write` names what creating a query costs beyond the 5 credits: each `llm` condition check and `llm` action run as it happens, and each post a `text` condition checks.
+- `swagger.json` is the published 3.10.1 spec.
+
 ## 4.10.0
 
 ### Added

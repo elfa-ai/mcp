@@ -11,7 +11,7 @@ export function registerAutoQuery(server: McpServer, deps: Deps): void {
     {
       title: "Read Auto queries",
       description:
-        "Read side of Auto. Free. method=list browses queries, method=get polls one query and returns its latest evaluation, plus failure when it failed with a recorded reason, method=executions and method=execution show what fired, method=sessions and method=session return the LLM analysis attached to a query. There is no push channel here, poll with method=get and respect pollAfterSeconds.",
+        "Read side of Auto. method=list, method=executions and method=execution cost 1 credit each; method=get, method=sessions and method=session are free. method=list browses queries, method=get polls one query and returns its latest evaluation, plus failure when it failed with a recorded reason, method=executions and method=execution show what fired, method=sessions and method=session return the LLM analysis attached to a query. There is no push channel here, poll with method=get and respect pollAfterSeconds.",
       inputSchema: {
         method: z
           .enum([
@@ -43,6 +43,12 @@ export function registerAutoQuery(server: McpServer, deps: Deps): void {
           .default(10)
           .describe("Page size for list style methods."),
         offset: z.number().int().min(0).default(0).describe("Pagination offset."),
+        after: z
+          .string()
+          .optional()
+          .describe(
+            "method=executions. Reads every execution once, oldest first: pass start, then pagination.nextCursor from the previous page. hasMore=false means none are ready yet, not the end, so poll again later. An execution can still be pending when read; method=execution gives its final status. Not with status, and a cursor works only with the queryId and type it was issued for. offset is ignored.",
+          ),
       },
       outputSchema: {
         method: z.string(),
@@ -94,7 +100,8 @@ export function registerAutoQuery(server: McpServer, deps: Deps): void {
                 status: args.status,
                 type: args.type,
                 limit: args.limit,
-                offset: args.offset,
+                offset: args.after === undefined ? args.offset : undefined,
+                after: args.after,
               }),
             );
             return { method: args.method, data, pollAfterSeconds: null };

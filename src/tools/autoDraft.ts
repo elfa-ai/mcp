@@ -11,7 +11,7 @@ export function registerAutoDraft(server: McpServer, deps: Deps): void {
     {
       title: TITLE,
       description:
-        "Read side of Auto drafts. Free. method=list browses saved drafts, method=get returns one draft. A draft is an Auto query parked without activating it: it never evaluates and never fires.",
+        "Read side of Auto drafts. Each call costs 1 credit. method=list browses saved drafts, method=get returns one draft. A draft is an Auto query parked without activating it: it never evaluates and never fires.",
       inputSchema: {
         method: z.enum(["list", "get"]).describe("Which read to perform."),
         draftId: z.string().optional().describe("Required for method=get."),

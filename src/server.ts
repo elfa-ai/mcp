@@ -8,6 +8,7 @@ import { registerAutoDraftWrite } from "./tools/autoDraftWrite.js";
 import { registerAutoQuery } from "./tools/autoQuery.js";
 import { registerAutoQueryWrite } from "./tools/autoQueryWrite.js";
 import { registerAutoValidate } from "./tools/autoValidate.js";
+import { registerCalendar } from "./tools/calendar.js";
 import { registerCalls } from "./tools/calls.js";
 import { registerChat } from "./tools/chat.js";
 import { registerEntities } from "./tools/entities.js";
@@ -15,6 +16,7 @@ import { registerEvents } from "./tools/events.js";
 import { registerMarket } from "./tools/market.js";
 import { registerMentions } from "./tools/mentions.js";
 import { registerNarratives } from "./tools/narratives.js";
+import { registerPredictionMarkets } from "./tools/predictionMarkets.js";
 import { registerStatus } from "./tools/status.js";
 import { registerTopAccounts } from "./tools/topAccounts.js";
 import { registerTrending } from "./tools/trending.js";
@@ -24,7 +26,7 @@ export const SERVER_VERSION = pkg.version;
 
 const INSTRUCTIONS = `Elfa gives you three things, in this order: API v3 market context across crypto and equities; Auto, a condition engine that acts on its own once armed; and API v2 crypto social intelligence.
 
-Start with the API v3 tools: entities, events, market, calls and top_accounts. events and calls filter by entity id, not ticker: resolve an asset with entities first and reuse the id. To see an account's positions from top_accounts, pass its handle to calls. When ranking callers by a track metric, quote scoredEpisodes alongside the number. If a v3 tool says it needs a higher-tier plan or is not permitted on this key, use the v2 tools.
+Start with the API v3 tools: entities, events, calendar, prediction_markets, market, calls and top_accounts. events, calendar and calls filter by entity id, not ticker: resolve an asset with entities first and reuse the id. To see an account's positions from top_accounts, pass its handle to calls. When ranking callers by a track metric, quote scoredEpisodes alongside the number. If a v3 tool says it needs a higher-tier plan or is not permitted on this key, use the v2 tools.
 
 Auto is a three step flow: auto_build drafts EQL from plain language, auto_validate checks it and returns the cost, auto_query_write activates it. Always run auto_validate before activating, and never activate without showing the user the estimated cost, any per-post X account or per-day follow account charges, and the action that will fire. auto_build drafts tweet conditions only for accounts in Elfa's real-time set; for any other X account, write the condition yourself and check it with auto_validate.
 
@@ -50,6 +52,8 @@ export function createServer(deps: Deps, entitlements?: Entitlements): McpServer
   registerStatus(server, deps);
   const entities = registerEntities(server, deps);
   const events = registerEvents(server, deps);
+  const calendar = registerCalendar(server, deps);
+  const predictionMarkets = registerPredictionMarkets(server, deps);
   const market = registerMarket(server, deps);
   const calls = registerCalls(server, deps);
   const topAccounts = registerTopAccounts(server, deps);
@@ -65,7 +69,16 @@ export function createServer(deps: Deps, entitlements?: Entitlements): McpServer
   const chat = registerChat(server, deps);
 
   applyToolGates(
-    { market_chat: chat, entities, events, market, calls, top_accounts: topAccounts },
+    {
+      market_chat: chat,
+      entities,
+      events,
+      calendar,
+      prediction_markets: predictionMarkets,
+      market,
+      calls,
+      top_accounts: topAccounts,
+    },
     entitlements,
   );
 

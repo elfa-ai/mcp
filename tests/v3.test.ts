@@ -287,6 +287,50 @@ describe("v3 tools", () => {
     expect(p.structuredContent).toMatchObject({ items: [{ openLong: 3 }], hasMore: false });
   });
 
+  it("calendar reads /v3/events/calendar with its list filters", async () => {
+    const get = vi.fn(list("entries"));
+    const r = await call(get, "calendar", {
+      category: ["unlock", "macro"],
+      status: ["scheduled", "occurred"],
+      minImportance: 80,
+    });
+    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
+    expect(get).toHaveBeenCalledWith("/v3/events/calendar", {
+      from: undefined,
+      to: undefined,
+      entityIds: undefined,
+      assetClass: undefined,
+      category: ["unlock", "macro"],
+      status: ["scheduled", "occurred"],
+      confidence: undefined,
+      minImportance: 80,
+      order: undefined,
+      limit: 10,
+      cursor: undefined,
+    });
+    expect(r.structuredContent).toMatchObject({ items: [{ id: "a" }], nextCursor: "next", hasMore: true, servedFrom: 1790672305 });
+    expect(r.structuredContent?.notice).toMatch(/third-party/i);
+
+    const bogus = vi.fn(list("entries"));
+    expect((await call(bogus, "calendar", { status: ["open"] })).isError).toBe(true);
+    expect((await call(bogus, "calendar", { minImportance: 101 })).isError).toBe(true);
+    expect(bogus).not.toHaveBeenCalled();
+  });
+
+  it("prediction_markets reads /v3/events/prediction-markets for the ids held", async () => {
+    const related = [{ id: "s1", kind: "storyline", markets: [{ provider: "kalshi", marketId: "M" }] }];
+    const get = vi.fn(async () => ({ related }));
+    const r = await call(get, "prediction_markets", { ids: ["s1", "e1"] });
+    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
+    expect(get).toHaveBeenCalledWith("/v3/events/prediction-markets", { ids: ["s1", "e1"], limit: 10 });
+    expect(r.structuredContent).toMatchObject({ related });
+    expect(r.structuredContent?.notice).toMatch(/third-party/i);
+
+    const none = vi.fn(async () => ({ related: [] }));
+    expect((await call(none, "prediction_markets", { ids: [] })).isError).toBe(true);
+    expect(none).not.toHaveBeenCalled();
+  });
+
   it("top_accounts reads /v3/people/accounts", async () => {
     const get = vi.fn(list("accounts"));
     const r = await call(get, "top_accounts", { limit: 3 });
@@ -318,6 +362,8 @@ describe("v3 tools", () => {
     for (const [name, args] of [
       ["entities", { q: "btc" }],
       ["events", { from: 1 }],
+      ["calendar", {}],
+      ["prediction_markets", { ids: ["e1"] }],
       ["market", {}],
       ["calls", { from: 1 }],
       ["top_accounts", {}],
@@ -336,6 +382,9 @@ describe("v3 tools", () => {
       ["entities", { q: "btc" }, ["entities/*"]],
       ["events", { from: 1 }, ["events/*"]],
       ["events", { from: 1 }, ["events/storylines"]],
+      ["calendar", {}, ["events/calendar"]],
+      ["calendar", {}, ["events/*"]],
+      ["prediction_markets", { ids: ["e1"] }, ["events/prediction-markets"]],
       ["market", {}, ["market/equity/mindshare"]],
       ["calls", { from: 1 }, ["calls/*"]],
       ["top_accounts", {}, ["people/accounts"]],
