@@ -109,6 +109,6 @@ If a call fails, `api_status` reports whether the key is valid and how many cred
 | Authentication failed | `ELFA_API_KEY` is missing, wrong, or expired |
 | Out of credits | The plan's credits are used up, or the prepaid balance is spent. Retrying does not help |
 | Forbidden on an Auto call | The key is not permitted to perform that Auto operation |
-| Forbidden on `entities`, `events`, `market`, `calls` or `top_accounts` | If the message names a missing scope, or says an Enterprise key is not configured yet, email support@elfa.ai with the `requestId` |
+| Forbidden on `entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` or `top_accounts` | If the message names a missing scope, or says an Enterprise key is not configured yet, email support@elfa.ai with the `requestId` |
 
 Claude Desktop logs are in `~/Library/Logs/Claude/mcp*.log` on macOS and `%APPDATA%\Claude\logs\mcp*.log` on Windows.

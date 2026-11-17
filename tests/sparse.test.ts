@@ -37,6 +37,25 @@ describe("sparse API payloads", () => {
     expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
   });
 
+  it("executions with after sends the cursor and no offset", async () => {
+    const seen: unknown[] = [];
+    const sdk = {
+      auto: {
+        listExecutions: async (params: unknown) => {
+          seen.push(params);
+          return { data: [], pagination: { limit: 10, hasMore: false, nextCursor: "c1" } };
+        },
+      },
+    };
+    const r = await call(sdk, "auto_query", { method: "executions", after: "start" });
+    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
+    await call(sdk, "auto_query", { method: "executions", offset: 20 });
+    expect(seen).toEqual([
+      { limit: 10, after: "start" },
+      { limit: 10, offset: 20 },
+    ]);
+  });
+
   it("validate without cost estimate", async () => {
     const sdk = { auto: { validateQuery: async () => ({ valid: true }) } };
     const r = await call(sdk, "auto_validate", { query: { conditions: {}, actions: [], expiresIn: "24h" } });

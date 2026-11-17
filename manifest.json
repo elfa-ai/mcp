@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "4.10.0",
+    "version": "4.11.0",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": [
@@ -57,6 +57,36 @@
         "events-list-v3",
         "storylines-list-v3",
         "arcs-list-v3"
+      ]
+    },
+    {
+      "name": "calendar",
+      "title": "Calendar",
+      "summary": "What is scheduled across crypto, equities and macro: launches, unlocks, votes, listings, earnings, data releases, rate decisions and more, soonest first, with how reliable each date is.",
+      "credits": "1, plus 1 per entry",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "operations": [
+        "calendar-list-v3"
+      ]
+    },
+    {
+      "name": "prediction_markets",
+      "title": "Prediction markets",
+      "summary": "The open Polymarket and Kalshi markets that events, storylines or arcs bear on, and how their odds moved around the story.",
+      "credits": "Free for now",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "operations": [
+        "prediction-markets-list-v3"
       ]
     },
     {
@@ -146,7 +176,7 @@
       "name": "auto_query",
       "title": "Read Auto queries",
       "summary": "Read side of Auto: list queries, poll one query, and read its executions and LLM sessions.",
-      "credits": "Free",
+      "credits": "1 for list, executions and execution; get, sessions and session free",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -183,7 +213,7 @@
       "name": "auto_draft",
       "title": "Read Auto drafts",
       "summary": "Read side of Auto drafts: list saved drafts and read one. Drafts are queries parked without activating; they never evaluate or fire.",
-      "credits": "Free",
+      "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
@@ -199,7 +229,7 @@
       "name": "auto_draft_write",
       "title": "Write Auto drafts",
       "summary": "Create, update, delete or activate an Auto draft. Converting a draft activates it as a live query that runs unattended.",
-      "credits": "Free, except convert which costs the same as creating a query",
+      "credits": "1 to upsert or delete, convert costs the same as creating a query",
       "annotations": {
         "readOnlyHint": false,
         "destructiveHint": true,

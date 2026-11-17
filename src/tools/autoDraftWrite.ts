@@ -12,7 +12,7 @@ export function registerAutoDraftWrite(server: McpServer, deps: Deps): void {
     {
       title: TITLE,
       description:
-        "Create, update, delete or activate an Auto draft. method=upsert parks a query as a draft without activating it; drafts never evaluate and never fire. method=delete removes a draft. method=convert activates a draft as a live query, which runs unattended and fires its action without asking again, and costs the same as creating a query. upsert and delete are free.",
+        "Create, update, delete or activate an Auto draft. method=upsert parks a query as a draft without activating it; drafts never evaluate and never fire. method=delete removes a draft. method=convert activates a draft as a live query, which runs unattended and fires its action without asking again, and costs the same as creating a query. upsert and delete cost 1 credit each.",
       inputSchema: {
         method: z
           .enum(["upsert", "delete", "convert"])

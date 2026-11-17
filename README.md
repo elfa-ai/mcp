@@ -69,22 +69,24 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 
 <!-- tools:start -->
 
-16 tools, mapped to every documented `/v2` and `/v3` operation.
+18 tools, mapped to every documented `/v2` and `/v3` operation.
 
 | Tool | Mode | Cost | What it does |
 | --- | --- | --- | --- |
 | `api_status` | read | Free | Check API key tier, credit usage and remaining requests, and historyFrom, how far back events, market and calls read. Also confirms the API is reachable. |
 | `entities` | read | 1 per call | Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search. |
 | `events` | read | 1, plus 1 per event or 2 per storyline or arc | What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic. |
+| `calendar` | read | 1, plus 1 per entry | What is scheduled across crypto, equities and macro: launches, unlocks, votes, listings, earnings, data releases, rate decisions and more, soonest first, with how reliable each date is. |
+| `prediction_markets` | read | Free for now | The open Polymarket and Kalshi markets that events, storylines or arcs bear on, and how their odds moved around the story. |
 | `market` | read | call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50 | Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them. |
 | `calls` | read | 1, plus 1 per call or 2 per episode; positioning 2 | Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now. |
 | `top_accounts` | read | 5 by standing, 25 by a track metric, doubled for limit over 50 | X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn). |
 | `auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
 | `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue. |
-| `auto_query` | read | Free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
+| `auto_query` | read | 1 for list, executions and execution; get, sessions and session free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
 | `auto_query_write` | write | 5 plus LLM usage to create, free to cancel or delete | Activate, cancel or delete an Auto query. Activated queries run unattended and fire their action when conditions are met. |
-| `auto_draft` | read | Free | Read side of Auto drafts: list saved drafts and read one. Drafts are queries parked without activating; they never evaluate or fire. |
-| `auto_draft_write` | write | Free, except convert which costs the same as creating a query | Create, update, delete or activate an Auto draft. Converting a draft activates it as a live query that runs unattended. |
+| `auto_draft` | read | 1 per call | Read side of Auto drafts: list saved drafts and read one. Drafts are queries parked without activating; they never evaluate or fire. |
+| `auto_draft_write` | write | 1 to upsert or delete, convert costs the same as creating a query | Create, update, delete or activate an Auto draft. Converting a draft activates it as a live query that runs unattended. |
 | `mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets. |
 | `trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
 | `narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
@@ -105,7 +107,7 @@ Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/tools
 
 ### API v3
 
-`entities`, `events`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/api/v3/overview): events, storylines and arcs; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/get-started/pricing#api-v3).
+`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/api/v3/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/get-started/pricing#api-v3), except `prediction_markets`, which is free for now.
 
 - Filters take entity ids, not tickers. Resolve an asset with `entities` first and reuse the id.
 - Times are unix seconds. Milliseconds are refused.
