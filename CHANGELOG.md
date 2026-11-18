@@ -1,5 +1,19 @@
 # Changelog
 
+## 4.12.0
+
+### Added
+
+- **`verify` checks one claim** against X posts and public Telegram channels from the 7 days before `asOf`, and web pages published by then. It returns a verdict (`supported`, `contradicted` or `notEnoughEvidence`, which means unknown, not false), the probability of each, up to 10 evidence links with their `decisiveness` and the `basis` the verdict rests on, and `coverage`. `decision` asks one more question of the same evidence: `yesNo`, `choice` between 2 to 20 options, or `score` on 2 to 10 levels. `context` adds background, such as how a market resolves, that is never treated as evidence. 1 credit per call whatever the verdict; errors cost nothing. Needs a PAYG, Grow or Enterprise plan.
+- **`monitors` and `monitors_write` cover Monitors**: a monitor watches new Elfa events and the open web for a query written in plain words, and POSTs each match to an https webhook signed with Standard Webhooks, until deleted. `monitors_write` creates (`query` and `webhookUrl`), updates and deletes; creating returns the monitor with its `webhookSecret`. `monitors` lists the key's monitors, reads one, and pages a monitor's matches from the last 30 days with `cursor`. A live monitor costs 2 credits for each started hour; every other Monitors call is free. A key holds 20 live monitors. Needs a PAYG, Grow or Enterprise plan.
+
+### Changed
+
+- `verify` is plan-gated like the other API v3 tools: on a key without the `verify` scope it is listed as needing a higher-tier plan, and calling it costs nothing. `monitors` and `monitors_write` are not gated by the server; the API answers `403` on a key without Monitors.
+- `verify` and `monitors_write` send each request once, whatever `ELFA_RETRIES` says, so a retry never charges a claim check twice or creates a second monitor.
+- The server instructions, the README, the installation guide and the plugin's get-started skill describe `verify` and Monitors, and ask agents to show the query, the webhook URL and the hourly cost before creating a monitor.
+- `swagger.json` is the published 3.13.0 spec. Monitors is documented on docs.elfa.ai but not yet in the published OpenAPI file, so its operations are listed in `monitors.json`, and `check:drift` checks the manifest against both files.
+
 ## 4.11.0
 
 ### Added

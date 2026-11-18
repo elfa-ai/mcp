@@ -36,6 +36,7 @@ export const TOOL_GATES: Readonly<Record<string, ToolGate>> = {
   },
   calls: { scopes: ["calls", "calls/*", "calls/episodes", "calls/positioning"] },
   top_accounts: { scopes: ["people/accounts"] },
+  verify: { scopes: ["verify"] },
 };
 
 export const UPGRADE_URL = "https://www.elfa.ai/pricing";

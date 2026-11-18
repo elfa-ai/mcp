@@ -11,7 +11,7 @@ async function callChat(
 ) {
   const [ct, st] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "probe", version: "1.0.0" });
-  const server = createServer({ sdk: { chat } as unknown as Deps["sdk"], v3: { get: async () => ({}) }, maxResponseChars: 60000 });
+  const server = createServer({ sdk: { chat } as unknown as Deps["sdk"], v3: { get: async () => ({}), send: async () => ({}) }, maxResponseChars: 60000 });
   await Promise.all([client.connect(ct), server.connect(st)]);
   const result = await client.callTool({
     name: "market_chat",

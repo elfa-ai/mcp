@@ -5,7 +5,7 @@ import { createServer } from "../src/server.js";
 import type { Deps } from "../src/client.js";
 
 function makeDeps(sdk: unknown): Deps {
-  return { sdk: sdk as Deps["sdk"], v3: { get: async () => ({}) }, maxResponseChars: 60000 };
+  return { sdk: sdk as Deps["sdk"], v3: { get: async () => ({}), send: async () => ({}) }, maxResponseChars: 60000 };
 }
 
 async function call(sdk: unknown, name: string, args: Record<string, unknown>) {

@@ -11,8 +11,11 @@ export interface V3ClientOptions {
 
 export type V3Params = Record<string, string | number | boolean | string[] | undefined>;
 
+export type V3WriteMethod = "POST" | "PATCH" | "DELETE";
+
 export interface V3Client {
   get(path: string, params?: V3Params, limits?: { timeout?: number; retries?: number }): Promise<Record<string, unknown>>;
+  send(method: V3WriteMethod, path: string, body?: Record<string, unknown>): Promise<Record<string, unknown>>;
 }
 
 export class V3RedirectError extends Error {}
@@ -78,13 +81,20 @@ function causeOf(error: TypeError): string {
 export function createV3Client(options: V3ClientOptions): V3Client {
   const base = (options.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, "");
 
-  async function request(url: string, timeout: number): Promise<Record<string, unknown>> {
+  async function request(
+    url: string,
+    timeout: number,
+    write?: { method: V3WriteMethod; body: Record<string, unknown> | undefined },
+  ): Promise<Record<string, unknown>> {
     const response = await fetch(url, {
+      method: write?.method ?? "GET",
       headers: {
         ...options.headers,
         Accept: "application/json",
+        ...(write?.body ? { "Content-Type": "application/json" } : {}),
         "x-elfa-api-key": options.apiKey,
       },
+      ...(write?.body ? { body: JSON.stringify(write.body) } : {}),
       redirect: "error",
       signal: AbortSignal.timeout(timeout),
     });
@@ -92,8 +102,12 @@ export function createV3Client(options: V3ClientOptions): V3Client {
     return (await response.json()) as Record<string, unknown>;
   }
 
-  function once(url: string, timeout: number): Promise<Record<string, unknown>> {
-    return request(url, timeout).catch((error: unknown) => {
+  function once(
+    url: string,
+    timeout: number,
+    write?: { method: V3WriteMethod; body: Record<string, unknown> | undefined },
+  ): Promise<Record<string, unknown>> {
+    return request(url, timeout, write).catch((error: unknown) => {
       if (error instanceof Error && error.name === "TimeoutError") {
         throw new Error(`The Elfa API did not answer within ${timeout} ms. Retry, or narrow the request.`);
       }
@@ -123,6 +137,9 @@ export function createV3Client(options: V3ClientOptions): V3Client {
           await new Promise((done) => setTimeout(done, RETRY_DELAY_MS * 2 ** attempt));
         }
       }
+    },
+    send(method, path, body) {
+      return once(`${base}${path}`, options.timeout, { method, body });
     },
   };
 }

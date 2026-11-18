@@ -11,7 +11,7 @@ import {
 } from "../src/entitlements.js";
 
 function deps(sdk: Partial<Deps["sdk"]> = {}): Deps {
-  return { sdk: sdk as Deps["sdk"], v3: { get: async () => ({}) }, maxResponseChars: 60000 };
+  return { sdk: sdk as Deps["sdk"], v3: { get: async () => ({}), send: async () => ({}) }, maxResponseChars: 60000 };
 }
 
 async function connect(d: Deps, scopes?: string[]) {

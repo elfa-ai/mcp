@@ -42,7 +42,7 @@ export function protectedResourceMetadata(config: OAuthConfig) {
     scopes_supported: config.scopes,
     bearer_methods_supported: ["header"],
     resource_name: "Elfa",
-    resource_documentation: "https://docs.elfa.ai/tools/mcp",
+    resource_documentation: "https://docs.elfa.ai/integrations/mcp",
   };
 }
 

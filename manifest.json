@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "4.11.0",
+    "version": "4.12.0",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": [
@@ -138,6 +138,55 @@
       },
       "operations": [
         "top-accounts-v3"
+      ]
+    },
+    {
+      "name": "verify",
+      "title": "Verify",
+      "summary": "Check whether one claim is true against recent X posts, public Telegram channels and web pages. Returns a verdict (supported, contradicted or notEnoughEvidence), its probabilities and links to the evidence, and can answer a yes/no, choice or score question from the same evidence.",
+      "credits": "1 per call, whatever the verdict",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "operations": [
+        "verify-v3"
+      ]
+    },
+    {
+      "name": "monitors",
+      "title": "Read monitors",
+      "summary": "Read side of Monitors: list this key's monitors, read one, and page through a monitor's matches.",
+      "credits": "Free",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "operations": [
+        "monitor-list-v3",
+        "monitor-get-v3",
+        "monitor-events-v3"
+      ]
+    },
+    {
+      "name": "monitors_write",
+      "title": "Write monitors",
+      "summary": "Create, update or delete a monitor, which watches new Elfa events and the web for something described in one sentence and sends each match to a signed webhook until deleted.",
+      "credits": "2 per started hour while live; update and delete free",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "operations": [
+        "monitor-create-v3",
+        "monitor-update-v3",
+        "monitor-delete-v3"
       ]
     },
     {

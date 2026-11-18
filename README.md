@@ -1,6 +1,6 @@
 # Elfa MCP
 
-Model Context Protocol server for the [Elfa API](https://docs.elfa.ai) — API v3 events, positions and rankings across crypto and equities, **Auto**, a condition engine that watches the market and fires an action when your conditions are met, plus crypto social intelligence from X and Telegram.
+Model Context Protocol server for the [Elfa API](https://docs.elfa.ai) — API v3 events, positions and rankings across crypto and equities, **Verify** to check a claim, **Monitors** that watch for something you describe in one sentence, **Auto**, a condition engine that watches the market and fires an action when your conditions are met, plus crypto social intelligence from X and Telegram.
 
 Works with any MCP client, either signed in to the hosted server or running locally with an API key.
 
@@ -8,7 +8,7 @@ Works with any MCP client, either signed in to the hosted server or running loca
 
 **Hosted, sign in with Elfa**
 
-Add `https://mcp.elfa.ai/mcp` as a remote MCP server in your client and approve it in your browser with your [dev.elfa.ai](https://dev.elfa.ai) account. No key to copy, nothing to install. If your client cannot sign in, run the server locally instead. Setup steps are in the [MCP guide](https://docs.elfa.ai/tools/mcp).
+Add `https://mcp.elfa.ai/mcp` as a remote MCP server in your client and approve it in your browser with your [dev.elfa.ai](https://dev.elfa.ai) account. No key to copy, nothing to install. If your client cannot sign in, run the server locally instead. Setup steps are in the [MCP guide](https://docs.elfa.ai/integrations/mcp).
 
 **Local, API key**
 
@@ -61,7 +61,7 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 
 Upstream requests identify themselves as `User-Agent: elfa-mcp/<version> (<transport>; client=<app>)`. On stdio, `<app>` is the MCP client's name and version from the handshake; over HTTP, it is the connecting client's own `User-Agent` header. Set `User-Agent` in `ELFA_EXTRA_HEADERS` to send your own instead.
 
-The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints.
+The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints. `verify` and `monitors_write` are never retried, whatever `ELFA_RETRIES` says.
 
 Some MCP clients apply their own timeout, often around 60 seconds. `narratives` and `market_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
 
@@ -69,7 +69,7 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 
 <!-- tools:start -->
 
-18 tools, mapped to every documented `/v2` and `/v3` operation.
+21 tools, mapped to every documented `/v2` and `/v3` operation.
 
 | Tool | Mode | Cost | What it does |
 | --- | --- | --- | --- |
@@ -81,6 +81,9 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 | `market` | read | call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50 | Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them. |
 | `calls` | read | 1, plus 1 per call or 2 per episode; positioning 2 | Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now. |
 | `top_accounts` | read | 5 by standing, 25 by a track metric, doubled for limit over 50 | X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn). |
+| `verify` | read | 1 per call, whatever the verdict | Check whether one claim is true against recent X posts, public Telegram channels and web pages. Returns a verdict (supported, contradicted or notEnoughEvidence), its probabilities and links to the evidence, and can answer a yes/no, choice or score question from the same evidence. |
+| `monitors` | read | Free | Read side of Monitors: list this key's monitors, read one, and page through a monitor's matches. |
+| `monitors_write` | write | 2 per started hour while live; update and delete free | Create, update or delete a monitor, which watches new Elfa events and the web for something described in one sentence and sends each match to a signed webhook until deleted. |
 | `auto_build` | read | 1 plus LLM usage | Turn a plain-language monitoring request into an EQL query. Returns a draft to validate and activate, it does not activate anything itself. |
 | `auto_validate` | read | Free | Check EQL syntax and get a cost estimate before activating, or check that a symbol has market data on a venue. |
 | `auto_query` | read | 1 for list, executions and execution; get, sessions and session free | Read side of Auto: list queries, poll one query, and read its executions and LLM sessions. |
@@ -101,17 +104,24 @@ Not exposed as tools:
 
 <!-- tools:end -->
 
-Some tools depend on the plan: today `market_chat`, which needs a higher-tier plan than the free one, and the API v3 tools on a key whose scopes leave them out. At startup (stdio) or per request (HTTP, cached for a minute per key), the server reads the key's scopes from `/v2/key-status`. A tool the plan doesn't include stays listed, but its description says it needs a higher-tier plan, and calling it returns the upgrade link without calling the API or spending credits. If the scopes can't be read within 3 seconds, every tool is listed as usual and the API decides.
+Some tools depend on the plan: today `market_chat` and `verify`, which need a higher-tier plan than the free one, and the API v3 tools on a key whose scopes leave them out. At startup (stdio) or per request (HTTP, cached for a minute per key), the server reads the key's scopes from `/v2/key-status`. A tool the plan doesn't include stays listed, but its description says it needs a higher-tier plan, and calling it returns the upgrade link without calling the API or spending credits. If the scopes can't be read within 3 seconds, every tool is listed as usual and the API decides.
 
-Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/tools/sdks) for applications that can consume SSE.
+`monitors` and `monitors_write` are never locked by the server. On a key without Monitors, the API refuses the call with `403`.
+
+Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/integrations/overview#sdks) for applications that can consume SSE.
 
 ### API v3
 
-`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/api/v3/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/get-started/pricing#api-v3), except `prediction_markets`, which is free for now.
+`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/enrich/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/platform/pricing#api-v3), except `prediction_markets`, which is free for now.
 
 - Filters take entity ids, not tickers. Resolve an asset with `entities` first and reuse the id.
 - Times are unix seconds. Milliseconds are refused.
 - How far back a key reads depends on its plan. `api_status` returns it as `historyFrom`.
+
+`verify` and the Monitors tools need a PAYG, Grow or Enterprise plan.
+
+- [`verify`](https://docs.elfa.ai/verify/overview) checks one claim against X posts and public Telegram channels from the last 7 days, and web pages, and returns `supported`, `contradicted` or `notEnoughEvidence` with links to the evidence. It costs 1 credit whatever the verdict; errors cost nothing.
+- [Monitors](https://docs.elfa.ai/monitors/overview) watch new Elfa events and the open web for a query written in plain words, and POST each match to your https webhook, signed with [Standard Webhooks](https://www.standardwebhooks.com/). `monitors_write` creates, changes and deletes them; `monitors` lists them and reads back the last 30 days of matches. A live monitor costs 2 credits for each started hour until you delete it; every other Monitors call is free. A key holds 20 live monitors. Creating one returns `webhookSecret`, which verifies the signatures; `monitors` `method=get` returns it again.
 
 ### Where this differs from the raw API
 
@@ -120,7 +130,7 @@ The tools deliberately do not inherit every API default, because an agent pays f
 | | API | Here | Why |
 | --- | --- | --- | --- |
 | `pageSize` | 10 to 50 depending on endpoint, max 100 | 10 | Page through rather than pull everything |
-| `limit` on v3 tools | 10 or 50 depending on endpoint, max 30 or 200 | 10 | Page with `cursor` rather than pull everything |
+| `limit` on v3 tools | 10, 20 or 50 depending on endpoint, max 30, 100 or 200 | 10 | Page with `cursor` rather than pull everything |
 | `speed` on chat | `expert` | `fast` | Cheaper by default, ask for `expert` when depth matters |
 | Mention fields | full record | high signal fields | Pass `verbosity: "detailed"` for the rest |
 | Large responses | returned whole | trimmed to fit, with a note | Keeps one call from filling the context window |

@@ -4,7 +4,7 @@
 
 Add `https://mcp.elfa.ai/mcp` as a remote MCP server in your client and approve it in your browser with your [dev.elfa.ai](https://dev.elfa.ai) account. No key to copy, nothing to install. Each app you connect gets its own key, billed to your account and managed under **Connected apps** (settings → General).
 
-If your client cannot sign in, run the server locally as described below. Setup steps are in the [MCP guide](https://docs.elfa.ai/tools/mcp).
+If your client cannot sign in, run the server locally as described below. Setup steps are in the [MCP guide](https://docs.elfa.ai/integrations/mcp).
 
 ## Requirements
 
@@ -110,5 +110,6 @@ If a call fails, `api_status` reports whether the key is valid and how many cred
 | Out of credits | The plan's credits are used up, or the prepaid balance is spent. Retrying does not help |
 | Forbidden on an Auto call | The key is not permitted to perform that Auto operation |
 | Forbidden on `entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` or `top_accounts` | If the message names a missing scope, or says an Enterprise key is not configured yet, email support@elfa.ai with the `requestId` |
+| Forbidden on `verify`, `monitors` or `monitors_write` | They need a PAYG, Grow or Enterprise plan. On a paid plan, email support@elfa.ai with the `requestId` to have the scope added |
 
 Claude Desktop logs are in `~/Library/Logs/Claude/mcp*.log` on macOS and `%APPDATA%\Claude\logs\mcp*.log` on Windows.
