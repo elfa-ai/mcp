@@ -13,7 +13,7 @@ const manifest = JSON.parse(
 function deps(): Deps {
   return {
     sdk: {} as Deps["sdk"],
-    v3: { get: async () => ({}) },
+    v3: { get: async () => ({}), send: async () => ({}) },
     maxResponseChars: 60000,
   };
 }
@@ -77,7 +77,7 @@ describe("server", () => {
     await server.close();
   });
 
-  it("keeps draft reads and draft writes in separate tools", async () => {
+  it("keeps draft and monitor reads and writes in separate tools", async () => {
     const { client, server } = await connect();
     const { tools } = await client.listTools();
 
@@ -91,6 +91,8 @@ describe("server", () => {
 
     expect(methods("auto_draft")).toEqual(["list", "get"]);
     expect(methods("auto_draft_write")).toEqual(["upsert", "delete", "convert"]);
+    expect(methods("monitors")).toEqual(["list", "get", "matches"]);
+    expect(methods("monitors_write")).toEqual(["create", "update", "delete"]);
 
     await server.close();
   });
@@ -104,7 +106,7 @@ describe("server", () => {
       .map((tool) => tool.name)
       .sort();
 
-    expect(writers).toEqual(["auto_draft_write", "auto_query_write"]);
+    expect(writers).toEqual(["auto_draft_write", "auto_query_write", "monitors_write"]);
 
     await server.close();
   });
@@ -217,7 +219,7 @@ describe("api_status", () => {
           },
         }),
       } as unknown as Deps["sdk"],
-      v3: { get: async () => ({ historyFrom: 1788307200 }) },
+      v3: { get: async () => ({ historyFrom: 1788307200 }), send: async () => ({}) },
       maxResponseChars: 60000,
     });
 

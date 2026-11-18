@@ -1,0 +1,38 @@
+{
+  "info": {
+    "title": "Monitors",
+    "description": "The Monitors operations documented on docs.elfa.ai at https://docs.elfa.ai/monitors/overview, which the published OpenAPI file does not list yet."
+  },
+  "paths": {
+    "/v3/monitors": {
+      "post": {
+        "operationId": "monitor-create-v3",
+        "summary": "Create a monitor"
+      },
+      "get": {
+        "operationId": "monitor-list-v3",
+        "summary": "List monitors"
+      }
+    },
+    "/v3/monitors/{id}": {
+      "get": {
+        "operationId": "monitor-get-v3",
+        "summary": "Get a monitor"
+      },
+      "patch": {
+        "operationId": "monitor-update-v3",
+        "summary": "Update a monitor"
+      },
+      "delete": {
+        "operationId": "monitor-delete-v3",
+        "summary": "Delete a monitor"
+      }
+    },
+    "/v3/monitors/{id}/events": {
+      "get": {
+        "operationId": "monitor-events-v3",
+        "summary": "List a monitor's matches"
+      }
+    }
+  }
+}

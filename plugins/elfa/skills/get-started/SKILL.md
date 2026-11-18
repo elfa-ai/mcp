@@ -16,6 +16,7 @@ Elfa gives market context across crypto and equities from posts on X and Telegra
 5. `market` for whole-market views with no asset needed: `view=mindshare` for where attention is going, `view=call_book` for the crowd's long/short lean, `view=trending_contracts` for contract addresses people are pasting. It reads crypto unless you set `market=equity`; `trending_contracts` is crypto only.
 6. `calls` for positions accounts take in their posts. `level=positioning` for open longs and shorts on one asset now, `level=episodes` for each position from open to close. Filter by token or equity ids from `entities`, or by `handle`.
 7. `top_accounts` for the accounts with the most standing, or the best track record as callers with `metric=alphaScore`.
+8. `verify` to check one claim against recent posts and web pages before acting on it. `notEnoughEvidence` means unknown, not false. It needs a PAYG, Grow or Enterprise plan.
 
 ## API v2 tools
 
@@ -41,3 +42,13 @@ Auto watches conditions and notifies the user. It never trades.
 5. Check on a query with `auto_query` (`method=get`), waiting `pollAfterSeconds` between calls. Cancel with `auto_query_write` `method=cancel`.
 
 Use `auto_draft_write` (`method=upsert`) to save a query the user is still deciding on, without activating it, and `auto_draft` to list or read saved drafts.
+
+## Monitors
+
+A monitor watches new Elfa events and the web for something the user describes in one sentence, and sends each match to the user's https webhook until deleted. It needs a PAYG, Grow or Enterprise plan.
+
+1. Show the user the query, the webhook URL and the cost: 2 credits for each started hour the monitor is live. Create it with `monitors_write` (`method=create`) only after they confirm.
+2. Give the user the `webhookSecret` from the result. It verifies the signatures on the webhooks.
+3. Read past matches with `monitors` (`method=matches`), and delete the monitor with `monitors_write` (`method=delete`) when it is no longer needed.
+
+For exact rules on prices, indicators or named accounts, or for a Free key, use Auto instead.

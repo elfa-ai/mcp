@@ -19,6 +19,7 @@ function load<T>(file: string): T {
 
 const manifest = load<Manifest>("manifest.json");
 const swagger = load<Swagger>("swagger.json");
+const monitors = load<Swagger>("monitors.json");
 const pkg = load<{ version: string }>("package.json");
 const registry = load<{ version: string; packages: Array<{ version: string }> }>(
   "server.json",
@@ -32,13 +33,21 @@ const versions = new Set([
   ...registry.packages.map((entry) => entry.version),
 ]);
 
-const spec = new Set<string>();
-for (const [path, methods] of Object.entries(swagger.paths)) {
-  if (!scopes.some((scope) => path.startsWith(`${scope}/`))) continue;
-  for (const operation of Object.values(methods)) {
-    if (operation.operationId) spec.add(operation.operationId);
+function operationIds(document: Swagger): Set<string> {
+  const ids = new Set<string>();
+  for (const [path, methods] of Object.entries(document.paths)) {
+    if (!scopes.some((scope) => path.startsWith(`${scope}/`))) continue;
+    for (const operation of Object.values(methods)) {
+      if (operation.operationId) ids.add(operation.operationId);
+    }
   }
+  return ids;
 }
+
+const published = operationIds(swagger);
+const overlay = operationIds(monitors);
+const spec = new Set([...published, ...overlay]);
+const republished = [...overlay].filter((operation) => published.has(operation)).sort();
 
 const mapped = new Map<string, string>();
 const duplicates: string[] = [];
@@ -73,6 +82,12 @@ if (missing.length > 0) {
 if (unknown.length > 0) {
   problems.push(
     `manifest.json references operations that are not in the spec:\n  ${unknown.join("\n  ")}`,
+  );
+}
+
+if (republished.length > 0) {
+  problems.push(
+    `swagger.json now lists these monitors.json operations, so remove them from monitors.json:\n  ${republished.join("\n  ")}`,
   );
 }
 

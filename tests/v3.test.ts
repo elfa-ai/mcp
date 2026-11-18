@@ -8,12 +8,19 @@ import { toResult } from "../src/shape.js";
 import { createV3Client, queryString, V3ApiError, V3RedirectError, type V3Params } from "../src/v3.js";
 
 type Get = (path: string, params?: V3Params) => Promise<Record<string, unknown>>;
+type Send = Deps["v3"]["send"];
 
-async function call(get: Get, name: string, args: Record<string, unknown>, scopes?: string[]) {
+async function call(
+  get: Get,
+  name: string,
+  args: Record<string, unknown>,
+  scopes?: string[],
+  send: Send = async () => ({}),
+) {
   const [ct, st] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: "probe", version: "1.0.0" });
   const server = createServer(
-    { sdk: {} as Deps["sdk"], v3: { get }, maxResponseChars: 60000 },
+    { sdk: {} as Deps["sdk"], v3: { get, send }, maxResponseChars: 60000 },
     scopes ? { scopes } : undefined,
   );
   await Promise.all([client.connect(ct), server.connect(st)]);
@@ -195,6 +202,34 @@ describe("v3 client", () => {
     expect(down).toHaveBeenCalledTimes(1);
     vi.useRealTimers();
   });
+
+  it("sends a write once with a JSON body, whatever the retry setting", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ id: "m1" }), { status: 201 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = createV3Client({ apiKey: "k", baseUrl: "https://api.example", timeout: 1000, retries: 2 });
+
+    await expect(client.send("POST", "/v3/monitors", { query: "q" })).resolves.toEqual({ id: "m1" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("https://api.example/v3/monitors");
+    expect(init.method).toBe("POST");
+    expect(init.body).toBe(JSON.stringify({ query: "q" }));
+    expect(init.headers).toMatchObject({ "x-elfa-api-key": "k", "Content-Type": "application/json" });
+    expect(init.redirect).toBe("error");
+
+    const down = vi.fn(async () => new Response("{}", { status: 503 }));
+    vi.stubGlobal("fetch", down);
+    await expect(client.send("PATCH", "/v3/monitors/m1", { query: "q" })).rejects.toBeInstanceOf(V3ApiError);
+    expect(down).toHaveBeenCalledTimes(1);
+
+    const removed = vi.fn(async () => new Response(JSON.stringify({ id: "m1", deleted: true }), { status: 200 }));
+    vi.stubGlobal("fetch", removed);
+    await client.send("DELETE", "/v3/monitors/m1");
+    const [, deleteInit] = removed.mock.calls[0] as unknown as [string, RequestInit];
+    expect(deleteInit.method).toBe("DELETE");
+    expect(deleteInit.body).toBeUndefined();
+    expect(deleteInit.headers).not.toHaveProperty("Content-Type");
+  });
 });
 
 describe("v3 tools", () => {
@@ -357,8 +392,164 @@ describe("v3 tools", () => {
     expect(r.structuredContent?.notice).toMatch(/third-party/i);
   });
 
+  it("verify posts the claim to /v3/verify and returns the verdict", async () => {
+    const verdict = {
+      verdict: "supported",
+      probabilities: { supported: 0.9, contradicted: 0.02, notEnoughEvidence: 0.08 },
+      decision: { type: "yesNo", yes: 0.88 },
+      evidence: { twitter: [{ link: "https://x.com/a/status/1", decisiveness: 0.9, basis: true }], telegram: [], web: [] },
+      asOf: 1794830400,
+      searchedFrom: 1794225600,
+      coverage: { complete: true, sources: { twitter: "complete", telegram: "complete", web: "complete" }, captions: "complete" },
+    };
+    const send = vi.fn(async () => verdict);
+    const get = vi.fn();
+    const r = await call(
+      get,
+      "verify",
+      { statement: "Binance will list HYPE.", decision: { type: "yesNo", yes: "A date is announced." } },
+      undefined,
+      send,
+    );
+    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
+    expect(send).toHaveBeenCalledWith("POST", "/v3/verify", {
+      statement: "Binance will list HYPE.",
+      decision: { type: "yesNo", yes: "A date is announced." },
+    });
+    expect(r.structuredContent).toMatchObject({ verdict: "supported", decision: { yes: 0.88 } });
+    expect(get).not.toHaveBeenCalled();
+  });
+
+  it("verify refuses what the API would refuse, without a call", async () => {
+    const send = vi.fn(async () => ({}));
+    for (const args of [
+      { statement: "x".repeat(501) },
+      { statement: "a", context: "x".repeat(4001) },
+      { statement: "a", decision: { type: "choice", options: [{ label: "only", definition: "one" }] } },
+      { statement: "a", decision: { type: "score", levels: Array.from({ length: 11 }, (_, i) => `l${i}`) } },
+      { statement: "a", decision: { type: "maybe" } },
+      { statement: "a", decision: { type: "yesNo", yess: "typo" } },
+      { statement: "a", decision: { type: "choice", options: [{ label: "a", definition: "x", extra: 1 }, { label: "b", definition: "y" }] } },
+    ]) {
+      expect((await call(vi.fn(), "verify", args, undefined, send)).isError, JSON.stringify(args)).toBe(true);
+    }
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("monitors lists, reads one and pages a monitor's matches", async () => {
+    const id = "5b0c6f8e-2f7a-4f43-9a8e-3c1d2a9b7e10";
+    const monitor = { id, query: "q", webhookUrl: "https://example.com/hook", webhookSecret: "whsec_test", status: "active" };
+
+    const listed = vi.fn(async () => ({ data: [monitor], total: 1 }));
+    const l = await call(listed, "monitors", { method: "list" });
+    expect(l.isError, JSON.stringify(l.content)).toBeFalsy();
+    expect(listed).toHaveBeenCalledWith("/v3/monitors");
+    expect(l.structuredContent).toMatchObject({ method: "list", items: [{ id, webhookSecret: "whsec_test" }], nextCursor: null });
+
+    const one = vi.fn(async () => monitor);
+    const g = await call(one, "monitors", { method: "get", id });
+    expect(one).toHaveBeenCalledWith(`/v3/monitors/${id}`);
+    expect(g.structuredContent).toMatchObject({ items: [{ id, status: "active" }] });
+
+    const matches = vi.fn(async () => ({ data: [{ id: "msg_1", monitorId: id, items: [] }], nextCursor: "older" }));
+    const m = await call(matches, "monitors", { method: "matches", id, limit: 50, cursor: "c1" });
+    expect(matches).toHaveBeenCalledWith(`/v3/monitors/${id}/events`, { limit: 50, cursor: "c1" });
+    expect(m.structuredContent).toMatchObject({ method: "matches", items: [{ id: "msg_1" }], nextCursor: "older" });
+    expect(m.structuredContent?.notice).toMatch(/third-party/i);
+
+    const none = vi.fn();
+    expect((await call(none, "monitors", { method: "matches" })).isError).toBe(true);
+    expect((await call(none, "monitors", { method: "get", id: "not-a-uuid" })).isError).toBe(true);
+    expect((await call(none, "monitors", { method: "matches", id, limit: 101 })).isError).toBe(true);
+    expect(none).not.toHaveBeenCalled();
+  });
+
+  it("monitors_write creates, updates and deletes, and returns the webhook secret on create", async () => {
+    const id = "5b0c6f8e-2f7a-4f43-9a8e-3c1d2a9b7e10";
+    const created = { id, query: "q q", webhookUrl: "https://example.com/hook", webhookSecret: "whsec_test", status: "active" };
+    const send = vi.fn(async () => created);
+    const c = await call(
+      vi.fn(),
+      "monitors_write",
+      { method: "create", query: "q q", webhookUrl: "https://example.com/hook" },
+      undefined,
+      send,
+    );
+    expect(c.isError, JSON.stringify(c.content)).toBeFalsy();
+    expect(send).toHaveBeenCalledWith("POST", "/v3/monitors", { query: "q q", webhookUrl: "https://example.com/hook" });
+    expect(c.structuredContent).toMatchObject({ method: "create", data: { webhookSecret: "whsec_test" } });
+    expect(JSON.stringify(c.content)).toContain("whsec_test");
+
+    const update = vi.fn(async () => created);
+    await call(vi.fn(), "monitors_write", { method: "update", id, query: "new query" }, undefined, update);
+    expect(update).toHaveBeenCalledWith("PATCH", `/v3/monitors/${id}`, { query: "new query" });
+
+    const remove = vi.fn(async () => ({ id, deleted: true }));
+    const d = await call(vi.fn(), "monitors_write", { method: "delete", id }, undefined, remove);
+    expect(remove).toHaveBeenCalledWith("DELETE", `/v3/monitors/${id}`);
+    expect(d.structuredContent).toMatchObject({ data: { deleted: true } });
+  });
+
+  it("monitors_write says to read the monitors before retrying an unsure create or update", async () => {
+    const id = "5b0c6f8e-2f7a-4f43-9a8e-3c1d2a9b7e10";
+    for (const [method, args] of [
+      ["create", { query: "q q", webhookUrl: "https://example.com/hook" }],
+      ["update", { id, query: "new query" }],
+    ] as const) {
+      for (const failure of [new V3ApiError("Service unavailable", 503), new Error("The Elfa API did not answer within 1000 ms, so the request may still have been applied.")]) {
+        const send = vi.fn(async () => Promise.reject(failure));
+        const r = await call(vi.fn(), "monitors_write", { method, ...args }, undefined, send);
+        expect(r.isError).toBe(true);
+        expect(JSON.stringify(r.content)).toContain("read the monitors with the monitors tool before retrying");
+        expect(JSON.stringify(r.content)).not.toContain("retry shortly");
+      }
+    }
+
+    const rejected = vi.fn(async () => Promise.reject(new V3ApiError("Invalid body", 400)));
+    const r = await call(vi.fn(), "monitors_write", { method: "create", query: "q q", webhookUrl: "https://example.com/hook" }, undefined, rejected);
+    expect(JSON.stringify(r.content)).toContain("Request rejected as invalid");
+    expect(JSON.stringify(r.content)).not.toContain("read the monitors");
+  });
+
+  it("monitors_write refuses what the API would refuse, without a call", async () => {
+    const id = "5b0c6f8e-2f7a-4f43-9a8e-3c1d2a9b7e10";
+    const send = vi.fn(async () => ({}));
+    for (const args of [
+      { method: "create", query: "q q" },
+      { method: "create", webhookUrl: "https://example.com/hook" },
+      { method: "create", query: "q q", webhookUrl: "http://example.com/hook" },
+      { method: "create", query: "qq", webhookUrl: "https://example.com/hook" },
+      { method: "create", query: "x".repeat(501), webhookUrl: "https://example.com/hook" },
+      { method: "update", query: "new query" },
+      { method: "update", id },
+      { method: "delete" },
+    ]) {
+      expect((await call(vi.fn(), "monitors_write", args, undefined, send)).isError, JSON.stringify(args)).toBe(true);
+    }
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it("leaves the monitors tools unlocked on a key without their scope, and the API decides", async () => {
+    const get = vi.fn(async () => ({ data: [], total: 0 }));
+    const r = await call(get, "monitors", { method: "list" }, ["key-status", "data/top-mentions"]);
+    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
+    expect(get).toHaveBeenCalledTimes(1);
+
+    const send = vi.fn(async () => ({ id: "m1", deleted: true }));
+    const w = await call(
+      vi.fn(),
+      "monitors_write",
+      { method: "delete", id: "5b0c6f8e-2f7a-4f43-9a8e-3c1d2a9b7e10" },
+      ["key-status", "data/top-mentions"],
+      send,
+    );
+    expect(w.isError, JSON.stringify(w.content)).toBeFalsy();
+    expect(send).toHaveBeenCalledTimes(1);
+  });
+
   it("locks every v3 tool for a key without v3 scopes, and never calls the API", async () => {
     const get = vi.fn(list("items"));
+    const send = vi.fn(async () => ({}));
     for (const [name, args] of [
       ["entities", { q: "btc" }],
       ["events", { from: 1 }],
@@ -367,16 +558,27 @@ describe("v3 tools", () => {
       ["market", {}],
       ["calls", { from: 1 }],
       ["top_accounts", {}],
+      ["verify", { statement: "a" }],
     ] as const) {
-      const r = await call(get, name, args, ["key-status", "data/top-mentions"]);
+      const r = await call(get, name, args, ["key-status", "data/top-mentions"], send);
       expect(r.isError, name).toBe(true);
       expect(JSON.stringify(r.content)).toContain("requires a higher-tier plan");
     }
     expect(get).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
   });
 
   it("unlocks a v3 tool for an exact scope or a family grant the API accepts", async () => {
     const get = vi.fn(list("items"));
+    const send = vi.fn(async () => ({
+      verdict: "notEnoughEvidence",
+      probabilities: { supported: 0, contradicted: 0, notEnoughEvidence: 1 },
+      decision: null,
+      evidence: { twitter: [], telegram: [], web: [] },
+      asOf: 1,
+      searchedFrom: 1,
+      coverage: { complete: true },
+    }));
     for (const [name, args, scopes] of [
       ["entities", { q: "btc" }, ["entities"]],
       ["entities", { q: "btc" }, ["entities/*"]],
@@ -388,8 +590,9 @@ describe("v3 tools", () => {
       ["market", {}, ["market/equity/mindshare"]],
       ["calls", { from: 1 }, ["calls/*"]],
       ["top_accounts", {}, ["people/accounts"]],
+      ["verify", { statement: "a" }, ["verify"]],
     ] as const) {
-      const r = await call(get, name, args, ["key-status", ...scopes]);
+      const r = await call(get, name, args, ["key-status", ...scopes], send);
       expect(r.isError, `${name} ${scopes.join(",")} ${JSON.stringify(r.content)}`).toBeFalsy();
     }
   });
@@ -404,7 +607,7 @@ describe("api_status historyFrom", () => {
         ping: async () => ({ success: true }),
         getApiKeyStatus: async () => ({ success: true, data: { tier: "grow" } }),
       } as unknown as Deps["sdk"],
-      v3: { get: async () => Promise.reject(new V3ApiError("down", 503)) },
+      v3: { get: async () => Promise.reject(new V3ApiError("down", 503)), send: async () => ({}) },
       maxResponseChars: 60000,
     });
     await Promise.all([client.connect(ct), server.connect(st)]);
@@ -424,7 +627,7 @@ describe("api_status historyFrom", () => {
         ping: async () => ({ success: true }),
         getApiKeyStatus: async () => ({ success: true, data: { tier: "grow" } }),
       } as unknown as Deps["sdk"],
-      v3: { get },
+      v3: { get, send: async () => ({}) },
       maxResponseChars: 60000,
     });
     await Promise.all([client.connect(ct), server.connect(st)]);
