@@ -20,7 +20,6 @@ export function registerMonitors(server: McpServer, deps: Deps): void {
         cursor: z
           .string()
           .min(1)
-          .max(200)
           .optional()
           .describe("method=matches. nextCursor from the previous page of the same monitor."),
       },

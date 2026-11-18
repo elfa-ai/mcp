@@ -9,7 +9,7 @@ const decisionArg = z
       type: z.literal("yesNo"),
       yes: z.string().max(500).optional().describe("What counts as yes."),
       no: z.string().max(500).optional().describe("What counts as no."),
-    }),
+    }).strict(),
     z.object({
       type: z.literal("choice"),
       options: z
@@ -17,15 +17,15 @@ const decisionArg = z
           z.object({
             label: z.string().min(1).max(100).describe("Unique within the request."),
             definition: z.string().min(1).max(500).describe("When this option applies."),
-          }),
+          }).strict(),
         )
         .min(2)
         .max(20),
-    }),
+    }).strict(),
     z.object({
       type: z.literal("score"),
       levels: z.array(z.string().min(1).max(200)).min(2).max(10).describe("Lowest first."),
-    }),
+    }).strict(),
   ])
   .optional()
   .describe(

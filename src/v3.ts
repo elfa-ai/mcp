@@ -109,7 +109,11 @@ export function createV3Client(options: V3ClientOptions): V3Client {
   ): Promise<Record<string, unknown>> {
     return request(url, timeout, write).catch((error: unknown) => {
       if (error instanceof Error && error.name === "TimeoutError") {
-        throw new Error(`The Elfa API did not answer within ${timeout} ms. Retry, or narrow the request.`);
+        throw new Error(
+          write
+            ? `The Elfa API did not answer within ${timeout} ms, so the request may still have been applied.`
+            : `The Elfa API did not answer within ${timeout} ms. Retry, or narrow the request.`,
+        );
       }
       if (error instanceof TypeError && error.cause !== undefined) {
         const cause = causeOf(error);

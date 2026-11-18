@@ -209,6 +209,7 @@ describe("v3 client", () => {
     const client = createV3Client({ apiKey: "k", baseUrl: "https://api.example", timeout: 1000, retries: 2 });
 
     await expect(client.send("POST", "/v3/monitors", { query: "q" })).resolves.toEqual({ id: "m1" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe("https://api.example/v3/monitors");
     expect(init.method).toBe("POST");
@@ -427,6 +428,8 @@ describe("v3 tools", () => {
       { statement: "a", decision: { type: "choice", options: [{ label: "only", definition: "one" }] } },
       { statement: "a", decision: { type: "score", levels: Array.from({ length: 11 }, (_, i) => `l${i}`) } },
       { statement: "a", decision: { type: "maybe" } },
+      { statement: "a", decision: { type: "yesNo", yess: "typo" } },
+      { statement: "a", decision: { type: "choice", options: [{ label: "a", definition: "x", extra: 1 }, { label: "b", definition: "y" }] } },
     ]) {
       expect((await call(vi.fn(), "verify", args, undefined, send)).isError, JSON.stringify(args)).toBe(true);
     }
@@ -485,6 +488,27 @@ describe("v3 tools", () => {
     const d = await call(vi.fn(), "monitors_write", { method: "delete", id }, undefined, remove);
     expect(remove).toHaveBeenCalledWith("DELETE", `/v3/monitors/${id}`);
     expect(d.structuredContent).toMatchObject({ data: { deleted: true } });
+  });
+
+  it("monitors_write says to read the monitors before retrying an unsure create or update", async () => {
+    const id = "5b0c6f8e-2f7a-4f43-9a8e-3c1d2a9b7e10";
+    for (const [method, args] of [
+      ["create", { query: "q q", webhookUrl: "https://example.com/hook" }],
+      ["update", { id, query: "new query" }],
+    ] as const) {
+      for (const failure of [new V3ApiError("Service unavailable", 503), new Error("The Elfa API did not answer within 1000 ms, so the request may still have been applied.")]) {
+        const send = vi.fn(async () => Promise.reject(failure));
+        const r = await call(vi.fn(), "monitors_write", { method, ...args }, undefined, send);
+        expect(r.isError).toBe(true);
+        expect(JSON.stringify(r.content)).toContain("read the monitors with the monitors tool before retrying");
+        expect(JSON.stringify(r.content)).not.toContain("retry shortly");
+      }
+    }
+
+    const rejected = vi.fn(async () => Promise.reject(new V3ApiError("Invalid body", 400)));
+    const r = await call(vi.fn(), "monitors_write", { method: "create", query: "q q", webhookUrl: "https://example.com/hook" }, undefined, rejected);
+    expect(JSON.stringify(r.content)).toContain("Request rejected as invalid");
+    expect(JSON.stringify(r.content)).not.toContain("read the monitors");
   });
 
   it("monitors_write refuses what the API would refuse, without a call", async () => {

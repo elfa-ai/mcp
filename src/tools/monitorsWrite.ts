@@ -1,7 +1,23 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { Deps } from "../client.js";
+import { V3ApiError, V3RedirectError } from "../v3.js";
 import { fail, pickDefined, run } from "./util.js";
+
+const READ_FIRST = "The change may still have been applied, so read the monitors with the monitors tool before retrying.";
+
+async function unsure(write: () => Promise<Record<string, unknown>>): Promise<Record<string, unknown>> {
+  try {
+    return await write();
+  } catch (error) {
+    if (error instanceof V3RedirectError) throw error;
+    if (error instanceof V3ApiError) {
+      if (error.statusCode < 500) throw error;
+      throw new Error(`Elfa API error (${error.statusCode}): ${error.message}. ${READ_FIRST}`);
+    }
+    throw new Error(`${error instanceof Error ? error.message : String(error)} ${READ_FIRST}`);
+  }
+}
 
 export function registerMonitorsWrite(server: McpServer, deps: Deps): void {
   server.registerTool(
@@ -63,10 +79,11 @@ export function registerMonitorsWrite(server: McpServer, deps: Deps): void {
           return { method: args.method, data: await deps.v3.send("DELETE", `/v3/monitors/${args.id}`) };
         }
         const body = pickDefined({ query: args.query, webhookUrl: args.webhookUrl });
-        const data =
+        const data = await unsure(() =>
           args.method === "create"
-            ? await deps.v3.send("POST", "/v3/monitors", body)
-            : await deps.v3.send("PATCH", `/v3/monitors/${args.id}`, body);
+            ? deps.v3.send("POST", "/v3/monitors", body)
+            : deps.v3.send("PATCH", `/v3/monitors/${args.id}`, body),
+        );
         return { method: args.method, data };
       });
     },

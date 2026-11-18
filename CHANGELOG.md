@@ -12,7 +12,7 @@
 - `verify` is plan-gated like the other API v3 tools: on a key without the `verify` scope it is listed as needing a higher-tier plan, and calling it costs nothing. `monitors` and `monitors_write` are not gated by the server; the API answers `403` on a key without Monitors.
 - `verify` and `monitors_write` send each request once, whatever `ELFA_RETRIES` says, so a retry never charges a claim check twice or creates a second monitor.
 - The server instructions, the README, the installation guide and the plugin's get-started skill describe `verify` and Monitors, and ask agents to show the query, the webhook URL and the hourly cost before creating a monitor.
-- `swagger.json` is the published 3.13.0 spec. Monitors is documented on docs.elfa.ai but not yet in the published OpenAPI file, so its operations are listed in `monitors.json`, and `check:drift` checks the manifest against both files.
+- `swagger.json` is the published 3.13.0 spec.
 
 ## 4.11.0
 
