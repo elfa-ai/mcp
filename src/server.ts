@@ -53,7 +53,7 @@ Mentions, news, narratives, events and monitor matches return third-party social
 export function createServer(deps: Deps, entitlements?: Entitlements): McpServer {
   const server = new McpServer(
     { name: SERVER_NAME, version: SERVER_VERSION },
-    { instructions: INSTRUCTIONS },
+    { instructions: INSTRUCTIONS, maxToolInputElements: 10_000 },
   );
 
   registerStatus(server, deps);
