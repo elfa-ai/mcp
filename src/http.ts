@@ -11,7 +11,7 @@ import {
   fetchEntitlements,
   type Entitlements,
 } from "./entitlements.js";
-import type { Deps } from "./client.js";
+import type { Credentials, Deps } from "./client.js";
 import {
   bearerChallenge,
   bearerToken,
@@ -123,18 +123,23 @@ export function createHttpApp(
   }
 
   /**
-   * The API key a request runs as. A request header wins, so API-key users of
-   * a hosted server are unaffected by OAuth. In oauth mode a bearer token is
-   * exchanged for its key by introspection; a request with neither gets the
-   * challenge that starts the client's sign-in. Returns undefined when it has
-   * already answered the request.
+   * The credentials a request runs as. A request header wins, so API-key users
+   * of a hosted server are unaffected by OAuth. In oauth mode a bearer token is
+   * checked by introspection and swapped for an API token of this server's own
+   * (or the grant's key, if the exchange is unavailable); a request with
+   * neither gets the challenge that starts the client's sign-in. Returns
+   * undefined when it has already answered the request, and null in stdio-like
+   * use with the server's own configured key.
    */
-  async function resolveApiKey(
+  async function resolveCredentials(
     req: Request,
     res: Response,
-  ): Promise<string | undefined | null> {
+  ): Promise<{ credentials: Credentials; cacheKey: string } | undefined | null> {
     const headerKey = header(req, "x-elfa-api-key");
-    if (headerKey || !oauth || !verifier) return headerKey ?? null;
+    if (headerKey) {
+      return { credentials: { apiKey: headerKey }, cacheKey: `key:${headerKey}` };
+    }
+    if (!oauth || !verifier) return null;
 
     const token = bearerToken(header(req, "authorization"));
     if (!token) {
@@ -144,7 +149,9 @@ export function createHttpApp(
     }
     try {
       const verified = await verifier.verify(token);
-      if (verified) return verified.apiKey;
+      if (verified) {
+        return { credentials: verified.credentials as Credentials, cacheKey: verified.subject };
+      }
     } catch (error) {
       if (error instanceof IntrospectionUnavailableError) {
         // Not a 401: that would send the client to sign in again for what is
@@ -180,15 +187,15 @@ export function createHttpApp(
     let transport: StreamableHTTPServerTransport | undefined;
 
     try {
-      const apiKey = await resolveApiKey(req, res);
-      if (apiKey === undefined) return;
+      const resolved = await resolveCredentials(req, res);
+      if (resolved === undefined) return;
       const deps = buildDeps(config, {
-        apiKey: apiKey ?? undefined,
+        ...(resolved?.credentials ?? {}),
         client: header(req, "user-agent"),
       });
 
-      const entitlements = apiKey
-        ? await entitlementCache.get(apiKey, () => loadEntitlements(deps))
+      const entitlements = resolved
+        ? await entitlementCache.get(resolved.cacheKey, () => loadEntitlements(deps))
         : undefined;
 
       server = createServer(deps, entitlements);

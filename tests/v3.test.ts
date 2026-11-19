@@ -68,6 +68,16 @@ describe("v3 client", () => {
     expect(init.redirect).toBe("error");
   });
 
+  it("sends an access token as a bearer and no key header", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ ok: 1 }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const client = createV3Client({ accessToken: "elfa_api_x", timeout: 1000, retries: 0 });
+    await client.get("/v3/entities");
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(init.headers).toMatchObject({ Authorization: "Bearer elfa_api_x" });
+    expect(init.headers).not.toHaveProperty("x-elfa-api-key");
+  });
+
   it("raises the API message and details with the status", async () => {
     vi.stubGlobal(
       "fetch",

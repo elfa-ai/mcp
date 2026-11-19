@@ -89,39 +89,130 @@ describe("protected resource metadata helpers", () => {
   });
 });
 
+/**
+ * The authorization server: introspection and token exchange answered
+ * separately. `exchange` is a body, an HTTP status, or "throw" for a network
+ * error.
+ */
+function authServer(
+  introspect: unknown,
+  exchange: unknown | number | "throw" = { access_token: "elfa_api_x", expires_in: 900 },
+) {
+  return vi.fn(async (url: string | URL) => {
+    if (String(url).endsWith("/token-exchange")) {
+      if (exchange === "throw") throw new Error("connect ECONNREFUSED");
+      if (typeof exchange === "number") {
+        return new Response(JSON.stringify({ error: exchange === 400 ? "invalid_grant" : "server_error" }), {
+          status: exchange,
+        });
+      }
+      return new Response(JSON.stringify(exchange), { status: 200 });
+    }
+    return new Response(JSON.stringify(introspect), { status: 200 });
+  });
+}
+
+const callsTo = (fetchImpl: ReturnType<typeof authServer>, suffix: string) =>
+  fetchImpl.mock.calls.filter(([url]) => String(url).endsWith(suffix));
+
 describe("TokenVerifier", () => {
   const config = () => loadConfig(OAUTH_ENV).oauth!;
+  const quiet = () => {};
 
-  it("returns the grant's key and caches it", async () => {
-    const fetchImpl = introspection(ACTIVE);
-    const verifier = new TokenVerifier(config(), fetchImpl as any);
-    expect((await verifier.verify("tok"))?.apiKey).toBe("elfak_from_grant");
-    expect((await verifier.verify("tok"))?.apiKey).toBe("elfak_from_grant");
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
-    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
-    expect((init.headers as Record<string, string>).authorization).toBe(
-      "Bearer introspect-secret",
-    );
+  it("swaps a valid token for an API token and caches both", async () => {
+    const fetchImpl = authServer({ ...ACTIVE, elfa_grant_id: 7 });
+    const verifier = new TokenVerifier(config(), fetchImpl as any, Date.now, quiet);
+    const first = await verifier.verify("tok");
+    expect(first?.credentials).toEqual({ accessToken: "elfa_api_x" });
+    expect(first?.subject).toBe("grant:7");
+    expect((await verifier.verify("tok"))?.credentials).toEqual({ accessToken: "elfa_api_x" });
+    expect(callsTo(fetchImpl, "/introspect")).toHaveLength(1);
+    expect(callsTo(fetchImpl, "/token-exchange")).toHaveLength(1);
+
+    const [url, init] = callsTo(fetchImpl, "/token-exchange")[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://auth.internal/token-exchange");
+    expect((init.headers as Record<string, string>).authorization).toBe("Bearer introspect-secret");
+    const body = new URLSearchParams(String(init.body));
+    expect(body.get("grant_type")).toBe("urn:ietf:params:oauth:grant-type:token-exchange");
+    expect(body.get("subject_token")).toBe("tok");
+    expect(body.get("audience")).toBe("https://auth.example.com");
   });
 
-  it("re-checks after the cache window", async () => {
+  it("re-introspects every minute and swaps again shortly before the API token expires", async () => {
     let now = 1_000_000;
-    const fetchImpl = introspection({ ...ACTIVE, exp: now / 1000 + 3600 });
-    const verifier = new TokenVerifier(config(), fetchImpl as any, () => now);
+    const fetchImpl = authServer(
+      { ...ACTIVE, exp: now / 1000 + 3600 },
+      { access_token: "elfa_api_x", expires_in: 900 },
+    );
+    const verifier = new TokenVerifier(config(), fetchImpl as any, () => now, quiet);
     await verifier.verify("tok");
     now += 61_000;
     await verifier.verify("tok");
-    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(callsTo(fetchImpl, "/introspect")).toHaveLength(2);
+    expect(callsTo(fetchImpl, "/token-exchange")).toHaveLength(1);
+    // Within the last minute of the API token's 15: swap again.
+    now = 1_000_000 + 900_000 - 30_000;
+    await verifier.verify("tok");
+    expect(callsTo(fetchImpl, "/token-exchange")).toHaveLength(2);
+  });
+
+  it("stops at once when introspection says the token is gone, cached API token or not", async () => {
+    let now = 1_000_000;
+    let active = true;
+    const fetchImpl = vi.fn(async (url: string | URL) =>
+      String(url).endsWith("/token-exchange")
+        ? new Response(JSON.stringify({ access_token: "elfa_api_x", expires_in: 900 }))
+        : new Response(JSON.stringify(active ? { ...ACTIVE, exp: now / 1000 + 3600 } : { active: false })),
+    );
+    const verifier = new TokenVerifier(config(), fetchImpl as any, () => now, quiet);
+    expect(await verifier.verify("tok")).toBeDefined();
+    active = false;
+    now += 61_000;
+    expect(await verifier.verify("tok")).toBeUndefined();
+  });
+
+  it("falls back to the grant's key when the exchange is unavailable, and backs off", async () => {
+    let now = 1_000_000;
+    const fetchImpl = authServer({ ...ACTIVE, exp: now / 1000 + 3600 }, 404);
+    const warn = vi.fn();
+    const verifier = new TokenVerifier(config(), fetchImpl as any, () => now, warn);
+    expect((await verifier.verify("tok"))?.credentials).toEqual({ apiKey: "elfak_from_grant" });
+    expect(warn).toHaveBeenCalledTimes(1);
+    // A second token within the back-off minute skips the exchange.
+    expect((await verifier.verify("tok2"))?.credentials).toEqual({ apiKey: "elfak_from_grant" });
+    expect(callsTo(fetchImpl, "/token-exchange")).toHaveLength(1);
+    now += 61_000;
+    await verifier.verify("tok3");
+    expect(callsTo(fetchImpl, "/token-exchange")).toHaveLength(2);
+  });
+
+  it("falls back to the key on a network error too", async () => {
+    const verifier = new TokenVerifier(config(), authServer(ACTIVE, "throw") as any, Date.now, quiet);
+    expect((await verifier.verify("tok"))?.credentials).toEqual({ apiKey: "elfak_from_grant" });
+  });
+
+  it("without the key, an exchange outage is unavailable and invalid_grant is invalid", async () => {
+    const { elfa_api_key: _omitted, ...noKey } = ACTIVE;
+    await expect(
+      new TokenVerifier(config(), authServer(noKey, 503) as any, Date.now, quiet).verify("t"),
+    ).rejects.toThrow(/token exchange failed: HTTP 503/);
+    await expect(
+      new TokenVerifier(config(), authServer(noKey, 400) as any, Date.now, quiet).verify("t"),
+    ).resolves.toBeUndefined();
+    expect(
+      (await new TokenVerifier(config(), authServer(noKey) as any, Date.now, quiet).verify("t"))
+        ?.credentials,
+    ).toEqual({ accessToken: "elfa_api_x" });
   });
 
   it("rejects inactive tokens and tokens for another resource", async () => {
     await expect(
-      new TokenVerifier(config(), introspection({ active: false }) as any).verify("t"),
+      new TokenVerifier(config(), authServer({ active: false }) as any).verify("t"),
     ).resolves.toBeUndefined();
     await expect(
       new TokenVerifier(
         config(),
-        introspection({ ...ACTIVE, aud: "https://other.example/mcp" }) as any,
+        authServer({ ...ACTIVE, aud: "https://other.example/mcp" }) as any,
       ).verify("t"),
     ).resolves.toBeUndefined();
   });
@@ -218,14 +309,15 @@ describe("http transport in oauth mode", () => {
     );
   });
 
-  it("serves a request with a valid bearer token", async () => {
-    const fetchImpl = introspection(ACTIVE);
-    const port = await listen(verifierWith(fetchImpl));
+  it("serves a request with a valid bearer token through the exchange", async () => {
+    const fetchImpl = authServer(ACTIVE);
+    const port = await listen(verifierWith(fetchImpl as any));
     const res = await request(port, "POST", "/mcp", {
       authorization: "Bearer elfa_at_good",
     });
     expect(res.status).toBe(200);
-    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(callsTo(fetchImpl, "/introspect")).toHaveLength(1);
+    expect(callsTo(fetchImpl, "/token-exchange")).toHaveLength(1);
   });
 
   it("answers invalid_token for a bad bearer token", async () => {
