@@ -98,10 +98,11 @@ export class EntitlementCache {
   constructor(private readonly now: () => number = Date.now) {}
 
   async get(
-    apiKey: string,
+    /** Who the entitlements belong to: `key:<api key>` or `grant:<id>`. */
+    identity: string,
     load: () => Promise<Entitlements | undefined>,
   ): Promise<Entitlements | undefined> {
-    const key = createHash("sha256").update(apiKey).digest("hex");
+    const key = createHash("sha256").update(identity).digest("hex");
     const hit = this.cache.get(key);
     if (hit && hit.expiresAtMs > this.now()) return hit.value;
     if (hit) this.cache.delete(key);

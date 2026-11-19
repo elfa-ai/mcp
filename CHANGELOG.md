@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.0.0
+
+### Changed
+
+- **OAuth mode calls the Elfa API with a token of its own.** After checking a client's token by introspection, the server swaps it for a short-lived token addressed to the Elfa API (RFC 8693 token exchange) and sends that as `Authorization: Bearer`. It swaps again shortly before that token expires, and re-checks the client's token at least once a minute as before. If the exchange is unavailable and introspection returned an API key, it calls with the key, as earlier versions did.
+- Uses `@elfa-ai/sdk` 7.6, which adds the `accessToken` option.
+- **Requires Node.js 22 or later** (was 20), as the SDK does since 6.0. Node.js 20 reached end of life in April 2026.
+
 ## 4.12.0
 
 ### Added

@@ -188,7 +188,8 @@ A hosted server can let clients sign in through a browser instead of sending an 
 2. The challenge points the client to the protected-resource metadata at `/.well-known/oauth-protected-resource/mcp`.
 3. That metadata names the authorization server, where the user signs in.
 4. The client then sends `Authorization: Bearer <token>`.
-5. The server checks the token against the authorization server's introspection endpoint. The endpoint answers with the Elfa API key the request runs as, so the token never reaches the Elfa API.
+5. The server checks the token against the authorization server's introspection endpoint, at most a minute apart.
+6. It swaps the token for a short-lived token addressed to the Elfa API (RFC 8693 token exchange, at the `token-exchange` endpoint next to introspection) and calls the API with that, so the client's token never reaches the Elfa API. If the exchange is unavailable and introspection returned an API key, it calls with the key instead.
 
 ```bash
 ELFA_MCP_TRANSPORT=http \
@@ -206,8 +207,8 @@ npx -y @elfa-ai/mcp
 | `ELFA_MCP_AUTH` | yes | `oauth` to enable, default `apikey` |
 | `ELFA_MCP_RESOURCE_URL` | yes | Canonical URL of this endpoint. Tokens must be issued for exactly this value |
 | `ELFA_OAUTH_ISSUER` | yes | Authorization server listed in the metadata |
-| `ELFA_OAUTH_INTROSPECTION_URL` | yes | Where tokens are checked |
-| `ELFA_OAUTH_INTROSPECTION_TOKEN` | yes | Bearer sent to the introspection endpoint |
+| `ELFA_OAUTH_INTROSPECTION_URL` | yes | Where tokens are checked. The token exchange is the same URL with `/introspect` replaced by `/token-exchange` |
+| `ELFA_OAUTH_INTROSPECTION_TOKEN` | yes | Bearer sent to the introspection and token exchange endpoints |
 | `ELFA_OAUTH_SCOPES` | no | Comma separated scopes to advertise, default `elfa` |
 
 Notes:

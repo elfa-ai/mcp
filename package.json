@@ -1,6 +1,6 @@
 {
   "name": "@elfa-ai/mcp",
-  "version": "4.12.0",
+  "version": "5.0.0",
   "description": "Model Context Protocol server for the Elfa API - crypto social intelligence and the Auto condition engine",
   "license": "MIT",
   "author": "Elfa AI",
@@ -19,7 +19,7 @@
     "LICENSE"
   ],
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   },
   "publishConfig": {
     "access": "public",
@@ -58,7 +58,7 @@
   },
   "homepage": "https://docs.elfa.ai",
   "dependencies": {
-    "@elfa-ai/sdk": "^3.0.1",
+    "@elfa-ai/sdk": "^7.6.0",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "express": "^5.1.0",
     "zod": "^3.25.0"

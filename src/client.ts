@@ -7,6 +7,8 @@ import { createV3Client, type V3Client } from "./v3.js";
 
 export interface Credentials {
   apiKey: string | undefined;
+  /** An exchanged OAuth token for the Elfa API; wins over apiKey when set. */
+  accessToken?: string | undefined;
 }
 
 export interface DepsOverrides extends Partial<Credentials> {
@@ -25,9 +27,10 @@ export function buildDeps(
   config: ServerConfig,
   overrides: DepsOverrides = {},
 ): Deps {
-  const apiKey = overrides.apiKey ?? config.apiKey;
+  const accessToken = overrides.accessToken;
+  const apiKey = accessToken ? undefined : (overrides.apiKey ?? config.apiKey);
 
-  if (!apiKey) {
+  if (!accessToken && !apiKey) {
     throw new CredentialError(missingCredential());
   }
 
@@ -37,7 +40,7 @@ export function buildDeps(
   );
 
   const sdk = new ElfaSDK({
-    elfaApiKey: apiKey,
+    ...(accessToken ? { accessToken } : { elfaApiKey: apiKey! }),
     timeout: config.timeout,
     retries: config.retries,
     ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}),
@@ -45,7 +48,7 @@ export function buildDeps(
   });
 
   const v3 = createV3Client({
-    apiKey,
+    ...(accessToken ? { accessToken } : { apiKey: apiKey! }),
     baseUrl: config.baseUrl,
     timeout: config.timeout,
     retries: config.retries,

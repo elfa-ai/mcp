@@ -2,7 +2,10 @@ const DEFAULT_BASE_URL = "https://api.elfa.ai";
 const RETRY_DELAY_MS = 1000;
 
 export interface V3ClientOptions {
-  apiKey: string;
+  /** Sent as `x-elfa-api-key`. Set this or `accessToken`. */
+  apiKey?: string;
+  /** Sent as `Authorization: Bearer`. Set this or `apiKey`. */
+  accessToken?: string;
   baseUrl?: string | undefined;
   timeout: number;
   retries: number;
@@ -92,7 +95,9 @@ export function createV3Client(options: V3ClientOptions): V3Client {
         ...options.headers,
         Accept: "application/json",
         ...(write?.body ? { "Content-Type": "application/json" } : {}),
-        "x-elfa-api-key": options.apiKey,
+        ...(options.accessToken
+          ? { Authorization: `Bearer ${options.accessToken}` }
+          : { "x-elfa-api-key": options.apiKey ?? "" }),
       },
       ...(write?.body ? { body: JSON.stringify(write.body) } : {}),
       redirect: "error",
