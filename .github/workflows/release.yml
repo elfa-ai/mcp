@@ -91,9 +91,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      # gh downloads through the API with the job token. The anonymous
+      # releases/latest/download URL is what GitHub throttles first under load
+      # (its 2026-11-09 incident "Increased timeouts due to surge in anonymous
+      # users" returned 504s for it).
       - name: Install mcp-publisher
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          asset="mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz"
+          gh release download --repo modelcontextprotocol/registry --pattern "$asset" --output - | tar xz mcp-publisher
 
       - name: Wait for the package to be resolvable
         run: |
