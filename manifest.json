@@ -1,7 +1,7 @@
 {
   "server": {
     "name": "elfa",
-    "version": "5.0.0",
+    "version": "5.1.0",
     "docs": "https://docs.elfa.ai",
     "spec": "https://docs.elfa.ai/swagger/swagger.json",
     "specScope": [
@@ -78,7 +78,7 @@
       "name": "prediction_markets",
       "title": "Prediction markets",
       "summary": "The open Polymarket and Kalshi markets that events, storylines or arcs bear on, and how their odds moved around the story.",
-      "credits": "Free for now",
+      "credits": "1 per call",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,

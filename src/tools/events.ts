@@ -66,6 +66,43 @@ export function registerEvents(server: McpServer, deps: Deps): RegisteredTool {
           ])
           .optional()
           .describe("level=events. What kind of development it is."),
+        eventCategory: z
+          .array(
+            z.enum([
+              "earnings",
+              "analystRating",
+              "corporateAction",
+              "acquisition",
+              "financing",
+              "partnership",
+              "product",
+              "personnel",
+              "plansAndMilestones",
+              "ipo",
+              "exchangeListing",
+              "delisting",
+              "tokenLaunch",
+              "tokenomics",
+              "governance",
+              "flows",
+              "marketMove",
+              "metricsAndReports",
+              "economy",
+              "policy",
+              "legal",
+              "securityIncident",
+              "outage",
+              "geopolitics",
+              "disaster",
+              "commentary",
+              "forecast",
+            ]),
+          )
+          .min(1)
+          .optional()
+          .describe(
+            "level=events. What happened, any of these. Combines with eventType, which is the domain: eventType=macro with eventCategory economy, commentary and forecast. An event with no category never matches. Not with q or ids.",
+          ),
         implication: z
           .enum(["bullish", "bearish", "mixed", "unclear"])
           .optional()
@@ -151,6 +188,7 @@ export function registerEvents(server: McpServer, deps: Deps): RegisteredTool {
           entityIds: args.entityIds,
           eventClass: args.eventClass,
           eventType: args.eventType,
+          eventCategory: args.eventCategory,
           implication: args.implication,
           assetClass: args.assetClass,
           novelty: args.novelty,
