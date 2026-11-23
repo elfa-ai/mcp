@@ -270,6 +270,20 @@ describe("v3 tools", () => {
     }
   });
 
+  it("events sends eventCategory and refuses an unknown or empty one", async () => {
+    const get = vi.fn(list("events"));
+    const r = await call(get, "events", { from: 1, eventType: "macro", eventCategory: ["economy", "forecast"] });
+    expect(r.isError, JSON.stringify(r.content)).toBeFalsy();
+    const [, params] = get.mock.calls[0] as unknown as [string, V3Params];
+    expect(params.eventCategory).toEqual(["economy", "forecast"]);
+    expect(params.eventType).toBe("macro");
+
+    const refused = vi.fn(list("events"));
+    expect((await call(refused, "events", { from: 1, eventCategory: ["rumour"] })).isError).toBe(true);
+    expect((await call(refused, "events", { from: 1, eventCategory: [] })).isError).toBe(true);
+    expect(refused).not.toHaveBeenCalled();
+  });
+
   it("market reads the chosen view and market", async () => {
     const get = vi.fn(list("bars"));
     const r = await call(get, "market", { view: "call_book", market: "equity", from: 1790845105 });

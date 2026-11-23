@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.1.0
+
+### Added
+
+- **`events` takes `eventCategory`** at `level=events`: what happened, such as `earnings`, `analystRating`, `exchangeListing`, `securityIncident` or `forecast`, any of the 27 categories. It combines with `eventType`, which stays the domain (`eventType=macro` with `economy`, `commentary` and `forecast`), works with `sort=relevant`, and is refused with `q` and `ids`. An event with no category never matches. Each event also returns its `eventCategory`, which can be `null`.
+
+### Changed
+
+- **`verify`, `monitors` and `monitors_write` work on every plan**, Free included. The README, the installation guide, the server instructions and the plugin's get-started skill no longer say they need a PAYG, Grow or Enterprise plan, or send a Free key to Auto instead of Monitors. `verify` is still listed as locked on a key whose scopes leave it out.
+- **`prediction_markets` costs 1 credit a call**, however many ids it sends. It was free.
+- `swagger.json` is the published 3.16.0 spec.
+
 ## 5.0.0
 
 ### Changed

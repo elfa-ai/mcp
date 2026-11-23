@@ -77,7 +77,7 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 | `entities` | read | 1 per call | Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search. |
 | `events` | read | 1, plus 1 per event or 2 per storyline or arc | What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic. |
 | `calendar` | read | 1, plus 1 per entry | What is scheduled across crypto, equities and macro: launches, unlocks, votes, listings, earnings, data releases, rate decisions and more, soonest first, with how reliable each date is. |
-| `prediction_markets` | read | Free for now | The open Polymarket and Kalshi markets that events, storylines or arcs bear on, and how their odds moved around the story. |
+| `prediction_markets` | read | 1 per call | The open Polymarket and Kalshi markets that events, storylines or arcs bear on, and how their odds moved around the story. |
 | `market` | read | call_book 2, mindshare 5, trending_contracts 5 (plus 5 over a 24 hour range), doubled for limit over 50 | Whole-market views for crypto or equities. view=mindshare ranks assets by share of attention, view=call_book is the crowd's long/short lean hour by hour, view=trending_contracts ranks contract addresses by how many posts pasted them. |
 | `calls` | read | 1, plus 1 per call or 2 per episode; positioning 2 | Positions accounts take in posts. level=calls for each post that takes or changes a position, level=episodes for each position from open to close with the author's track record, level=positioning for open longs and shorts on one asset now. |
 | `top_accounts` | read | 5 by standing, 25 by a track metric, doubled for limit over 50 | X accounts ranked by standing (how much other accounts engage with them) or, with metric, by their track record as callers (alphaScore, hitRate, avgReturn). |
@@ -104,7 +104,7 @@ Not exposed as tools:
 
 <!-- tools:end -->
 
-Some tools depend on the plan: today `market_chat` and `verify`, which need a higher-tier plan than the free one, and the API v3 tools on a key whose scopes leave them out. At startup (stdio) or per request (HTTP, cached for a minute per key), the server reads the key's scopes from `/v2/key-status`. A tool the plan doesn't include stays listed, but its description says it needs a higher-tier plan, and calling it returns the upgrade link without calling the API or spending credits. If the scopes can't be read within 3 seconds, every tool is listed as usual and the API decides.
+Some tools depend on the plan: today `market_chat`, which needs a higher-tier plan than the free one, and the API v3 tools and `verify` on a key whose scopes leave them out. At startup (stdio) or per request (HTTP, cached for a minute per key), the server reads the key's scopes from `/v2/key-status`. A tool the plan doesn't include stays listed, but its description says it needs a higher-tier plan, and calling it returns the upgrade link without calling the API or spending credits. If the scopes can't be read within 3 seconds, every tool is listed as usual and the API decides.
 
 `monitors` and `monitors_write` are never locked by the server. On a key without Monitors, the API refuses the call with `403`.
 
@@ -112,13 +112,13 @@ Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/integ
 
 ### API v3
 
-`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/enrich/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/platform/pricing#api-v3), except `prediction_markets`, which is free for now.
+`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/enrich/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/platform/pricing#api-v3).
 
 - Filters take entity ids, not tickers. Resolve an asset with `entities` first and reuse the id.
 - Times are unix seconds. Milliseconds are refused.
 - How far back a key reads depends on its plan. `api_status` returns it as `historyFrom`.
 
-`verify` and the Monitors tools need a PAYG, Grow or Enterprise plan.
+`verify` and the Monitors tools are open to every plan too.
 
 - [`verify`](https://docs.elfa.ai/verify/overview) checks one claim against X posts and public Telegram channels from the last 7 days, and web pages, and returns `supported`, `contradicted` or `notEnoughEvidence` with links to the evidence. It costs 1 credit whatever the verdict; errors cost nothing.
 - [Monitors](https://docs.elfa.ai/monitors/overview) watch new Elfa events and the open web for a query written in plain words, and POST each match to your https webhook, signed with [Standard Webhooks](https://www.standardwebhooks.com/). `monitors_write` creates, changes and deletes them; `monitors` lists them and reads back the last 30 days of matches. A live monitor costs 2 credits for each started hour until you delete it; every other Monitors call is free. A key holds 20 live monitors. Creating one returns `webhookSecret`, which verifies the signatures; `monitors` `method=get` returns it again.
