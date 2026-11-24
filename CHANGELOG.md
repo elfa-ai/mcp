@@ -10,7 +10,12 @@
 
 - **`verify`, `monitors` and `monitors_write` work on every plan**, Free included. The README, the installation guide, the server instructions and the plugin's get-started skill no longer say they need a PAYG, Grow or Enterprise plan, or send a Free key to Auto instead of Monitors. `verify` is still listed as locked on a key whose scopes leave it out.
 - **`prediction_markets` costs 1 credit a call**, however many ids it sends. It was free.
-- `swagger.json` is the published 3.16.0 spec.
+- `swagger.json` is the published 3.16.1 spec.
+- **The server describes Elfa the way docs.elfa.ai does**: "Get events, answers, verdicts and alerts from social and web data." That covers the MCP Registry entry (`server.json`), the npm description, the `.mcpb` bundle, the plugin and its get-started skill, and the README. The README names the docs products: Data, Explain, Verify, Monitors and Auto, plus the older Social data (v2) endpoints.
+- **The MCP Registry entry lists the hosted server**, `https://mcp.elfa.ai/mcp` over Streamable HTTP, next to the npm package.
+- **The README says `ELFA_RETRIES` applies to the whole server**, so raising it also retries `narratives`, which is charged again on each retry. `market_chat`, `verify` and `monitors_write` are never retried. The behaviour is unchanged.
+- **The README and the installation guide check setup with the free `api_status` tool.**
+- **`narratives` costs 5 credits, or 1 when nothing comes back**, as published. The tool description and the README said 5 a call.
 
 ## 5.0.0
 
