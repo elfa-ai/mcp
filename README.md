@@ -63,7 +63,7 @@ Ask *"Use Elfa's api_status tool and tell me my plan, my remaining requests and 
 
 Upstream requests identify themselves as `User-Agent: elfa-mcp/<version> (<transport>; client=<app>)`. On stdio, `<app>` is the MCP client's name and version from the handshake; over HTTP, it is the connecting client's own `User-Agent` header. Set `User-Agent` in `ELFA_EXTRA_HEADERS` to send your own instead.
 
-The timeout is high and retries are off on purpose. `narratives` and `market_chat` are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap data endpoints. `verify` and `monitors_write` are never retried, whatever `ELFA_RETRIES` says.
+The timeout is high and retries are off on purpose. `narratives` and `market_chat` are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. `ELFA_RETRIES` applies to the whole server, so raising it also retries `narratives`, and each retry is charged. `market_chat`, `verify` and `monitors_write` are never retried, whatever `ELFA_RETRIES` says.
 
 Some MCP clients apply their own timeout, often around 60 seconds. `narratives` and `market_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
 
