@@ -329,7 +329,7 @@
       "name": "narratives",
       "title": "Narratives",
       "summary": "Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords.",
-      "credits": "5 per call",
+      "credits": "5, or 1 when empty",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
