@@ -94,7 +94,7 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 | `auto_draft_write` | write | 1 to upsert or delete, convert costs the same as creating a query | Create, update, delete or activate an Auto draft. Converting a draft activates it as a live query that runs unattended. |
 | `mentions` | read | 1 per call | Social mentions from X and Telegram. mode=top ranks a ticker's mentions by engagement, mode=search filters by keyword or account, mode=news returns the token news feed, which is X posts from accounts tagged as news sources rather than articles from news outlets. |
 | `trending` | read | 1 per call | What is gaining social attention. scope=tokens for tickers, scope=contracts_twitter or scope=contracts_telegram for contract addresses. |
-| `narratives` | read | 5 per call | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
+| `narratives` | read | 5, or 1 when empty | Written narrative analysis with source links. scope=market extracts market-wide narratives, scope=keywords summarises events for specific keywords. |
 | `market_chat` | read | Varies by speed | Ask for written market analysis. Supports conversational chat, macro overview, quick summary, token intro, token analysis and account analysis. |
 
 Not exposed as tools:
