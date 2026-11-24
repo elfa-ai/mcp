@@ -1,7 +1,7 @@
 {
   "name": "@elfa-ai/mcp",
   "version": "5.1.0",
-  "description": "Model Context Protocol server for the Elfa API - crypto social intelligence and the Auto condition engine",
+  "description": "Model Context Protocol server for Elfa. Get events, answers, verdicts and alerts from social and web data.",
   "license": "MIT",
   "author": "Elfa AI",
   "type": "module",

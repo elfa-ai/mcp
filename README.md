@@ -1,8 +1,10 @@
 # Elfa MCP
 
-Model Context Protocol server for the [Elfa API](https://docs.elfa.ai) — API v3 events, positions and rankings across crypto and equities, **Verify** to check a claim, **Monitors** that watch for something you describe in one sentence, **Auto**, a condition engine that watches the market and fires an action when your conditions are met, plus crypto social intelligence from X and Telegram.
+Model Context Protocol server for [Elfa](https://docs.elfa.ai). Get events, answers, verdicts and alerts from social and web data.
 
-Works with any MCP client, either signed in to the hosted server or running locally with an API key.
+Elfa indexes social media and web pages, and turns them into high-intent events and entities. Your agent can query them, ask about them, or get an alert when they happen.
+
+The tools cover [Data](https://docs.elfa.ai/enrich/overview), [Explain](https://docs.elfa.ai/explain/overview), [Verify](https://docs.elfa.ai/verify/overview), [Monitors](https://docs.elfa.ai/monitors/overview) and [Auto](https://docs.elfa.ai/auto/overview), plus the older [Social data (v2)](https://docs.elfa.ai/legacy/social-data) endpoints. Works with any MCP client, either signed in to the hosted server or running locally with an API key.
 
 ## Install
 
@@ -47,7 +49,7 @@ claude mcp add elfa --env ELFA_API_KEY=your-key -- npx -y @elfa-ai/mcp
 
 VS Code uses `"servers"` instead of `"mcpServers"`. Everything else is the same.
 
-Ask *"what's trending in crypto right now?"* to confirm it works.
+Ask *"Use Elfa's api_status tool and tell me my plan, my remaining requests and historyFrom."* to confirm it works. The tool is free.
 
 ## Configuration
 
@@ -61,7 +63,7 @@ Ask *"what's trending in crypto right now?"* to confirm it works.
 
 Upstream requests identify themselves as `User-Agent: elfa-mcp/<version> (<transport>; client=<app>)`. On stdio, `<app>` is the MCP client's name and version from the handshake; over HTTP, it is the connecting client's own `User-Agent` header. Set `User-Agent` in `ELFA_EXTRA_HEADERS` to send your own instead.
 
-The timeout is high and retries are off on purpose. The interpretation endpoints are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. Raise `ELFA_RETRIES` only if you are calling the cheap measurement endpoints. `verify` and `monitors_write` are never retried, whatever `ELFA_RETRIES` says.
+The timeout is high and retries are off on purpose. `narratives` and `market_chat` are LLM-backed and can take over a minute, and they cost credits per attempt, so a silent retry would bill you again for a call you never saw. `ELFA_RETRIES` applies to the whole server, so raising it also retries `narratives`, and each retry is charged. `market_chat`, `verify` and `monitors_write` are never retried, whatever `ELFA_RETRIES` says.
 
 Some MCP clients apply their own timeout, often around 60 seconds. `narratives` and `market_chat` can exceed that; the request still completes and is still charged, even if the client gives up first.
 
@@ -110,9 +112,9 @@ Some tools depend on the plan: today `market_chat`, which needs a higher-tier pl
 
 Streaming endpoints stay available through the [SDKs](https://docs.elfa.ai/integrations/overview#sdks) for applications that can consume SSE.
 
-### API v3
+### Data, Verify and Monitors
 
-`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [API v3](https://docs.elfa.ai/enrich/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/platform/pricing#api-v3).
+`entities`, `events`, `calendar`, `prediction_markets`, `market`, `calls` and `top_accounts` read [Data](https://docs.elfa.ai/enrich/overview): events, storylines and arcs; scheduled dates; the prediction markets a story bears on; call books, mindshare and trending contracts; calls, call episodes and positioning; ranked accounts. They cover crypto and equities and are open to every plan. Each call costs credits, priced per endpoint on the [pricing page](https://docs.elfa.ai/platform/pricing#api-v3).
 
 - Filters take entity ids, not tickers. Resolve an asset with `entities` first and reuse the id.
 - Times are unix seconds. Milliseconds are refused.

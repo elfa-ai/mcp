@@ -97,7 +97,7 @@ browsers call the endpoint directly.
 
 ## Verifying
 
-Ask the client *"what's trending in crypto right now?"*. It should call `trending`.
+Ask the client *"Use Elfa's api_status tool and tell me my plan, my remaining requests and historyFrom."*. It should call `api_status`, which is free.
 
 If a call fails, `api_status` reports whether the key is valid and how many credits remain.
 
