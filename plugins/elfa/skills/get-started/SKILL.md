@@ -5,7 +5,7 @@ description: Orient a new Elfa user. Use when someone first connects Elfa or ask
 
 # Getting started with Elfa
 
-Elfa gives market context across crypto and equities from posts on X and Telegram, and sets up Auto alerts that notify the user when conditions are met.
+Elfa indexes social media and web pages, and turns them into high-intent events and entities. You can query them, ask about them, or get an alert when they happen, across crypto and equities.
 
 ## Research with the API v3 tools first
 
