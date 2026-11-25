@@ -178,7 +178,7 @@ describe("server", () => {
       .map((tool) => tool.name)
       .sort();
 
-    expect(closed).toEqual(["api_status", "auto_draft", "auto_query", "auto_validate"]);
+    expect(closed).toEqual(["api_status", "auto_draft", "auto_query", "auto_validate", "enterprise_docs"]);
 
     await server.close();
   });
@@ -233,6 +233,83 @@ describe("api_status", () => {
     expect(serialised).toContain("payg");
     expect(result.structuredContent).toMatchObject({ historyFrom: 1788307200 });
 
+    await server.close();
+  });
+});
+
+describe("enterprise_docs", () => {
+  const fragments = [
+    {
+      id: "f_552gftv3",
+      title: "Token feed",
+      markdown: "# Token feed\n",
+      endpoints: [{ method: "GET", path: "/v2/token-feed", docsUrl: null }],
+    },
+    { id: "f_p7qqxbr6", title: "Insights", markdown: "# Insights\n", endpoints: [] },
+  ];
+
+  async function withDocs(get: (path: string) => Promise<Record<string, unknown>>) {
+    const [ct, st] = InMemoryTransport.createLinkedPair();
+    const client = new Client({ name: "test", version: "1.0.0" });
+    const paths: string[] = [];
+    const server = createServer({
+      sdk: {} as unknown as Deps["sdk"],
+      v3: {
+        get: async (path: string) => {
+          paths.push(path);
+          return get(path);
+        },
+        send: async () => ({}),
+      },
+      maxResponseChars: 60000,
+    });
+    await Promise.all([client.connect(ct), server.connect(st)]);
+    return { client, server, paths };
+  }
+
+  it("lists the key's docs without an id", async () => {
+    const { client, server, paths } = await withDocs(async () => ({ success: true, data: { fragments } }));
+    const result = await client.callTool({ name: "enterprise_docs", arguments: {} });
+    expect(paths).toEqual(["/v2/docs/enterprise"]);
+    expect(result.structuredContent).toEqual({
+      docs: [
+        { id: "f_552gftv3", title: "Token feed", method: "GET", path: "/v2/token-feed" },
+        { id: "f_p7qqxbr6", title: "Insights", method: null, path: null },
+      ],
+    });
+    await server.close();
+  });
+
+  it("returns one doc's markdown and endpoints for an id", async () => {
+    const { client, server } = await withDocs(async () => ({ success: true, data: { fragments } }));
+    const result = await client.callTool({ name: "enterprise_docs", arguments: { id: "f_552gftv3" } });
+    expect(result.isError).toBeFalsy();
+    expect(result.structuredContent).toEqual({ doc: fragments[0] });
+    await server.close();
+  });
+
+  it("says so when the id is not one of the key's docs", async () => {
+    const { client, server } = await withDocs(async () => ({ success: true, data: { fragments } }));
+    const result = await client.callTool({ name: "enterprise_docs", arguments: { id: "f_aaaaaaaa" } });
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result.content)).toContain("without an id");
+    await server.close();
+  });
+
+  it("is an empty list for a key with no enterprise docs", async () => {
+    const { client, server } = await withDocs(async () => ({ success: true, data: { fragments: [] } }));
+    const result = await client.callTool({ name: "enterprise_docs", arguments: {} });
+    expect(result.structuredContent).toEqual({ docs: [] });
+    await server.close();
+  });
+
+  it("reports an API failure as a tool error", async () => {
+    const { client, server } = await withDocs(async () => {
+      throw Object.assign(new Error("Enterprise docs are unavailable right now"), { statusCode: 503 });
+    });
+    const result = await client.callTool({ name: "enterprise_docs", arguments: {} });
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result.content)).toContain("unavailable");
     await server.close();
   });
 });

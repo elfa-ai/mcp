@@ -11,6 +11,7 @@ import { registerAutoValidate } from "./tools/autoValidate.js";
 import { registerCalendar } from "./tools/calendar.js";
 import { registerCalls } from "./tools/calls.js";
 import { registerChat } from "./tools/chat.js";
+import { registerEnterpriseDocs } from "./tools/enterpriseDocs.js";
 import { registerEntities } from "./tools/entities.js";
 import { registerEvents } from "./tools/events.js";
 import { registerMarket } from "./tools/market.js";
@@ -57,6 +58,7 @@ export function createServer(deps: Deps, entitlements?: Entitlements): McpServer
   );
 
   registerStatus(server, deps);
+  registerEnterpriseDocs(server, deps);
   const entities = registerEntities(server, deps);
   const events = registerEvents(server, deps);
   const calendar = registerCalendar(server, deps);

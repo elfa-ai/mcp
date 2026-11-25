@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- **`enterprise_docs`**: the docs for the enterprise endpoints this key can call, which the public docs do not list. Without an `id` it lists them (id, title, method, path); with one it returns that endpoint's full docs as markdown with its endpoint entry. Free. A key with no enterprise endpoints gets an empty list. Reads `GET /v2/docs/enterprise`.
+
 ## 5.1.0
 
 ### Added

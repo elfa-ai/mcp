@@ -28,6 +28,19 @@
       ]
     },
     {
+      "name": "enterprise_docs",
+      "title": "Enterprise docs",
+      "summary": "Docs for the enterprise endpoints this key can call, which the public docs do not list: a list without an id, one endpoint's full docs with one.",
+      "credits": "Free",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "operations": []
+    },
+    {
       "name": "entities",
       "title": "Entities",
       "summary": "Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search.",

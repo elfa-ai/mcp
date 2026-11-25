@@ -71,11 +71,12 @@ Some MCP clients apply their own timeout, often around 60 seconds. `narratives` 
 
 <!-- tools:start -->
 
-21 tools, mapped to every documented `/v2` and `/v3` operation.
+22 tools, mapped to every documented `/v2` and `/v3` operation.
 
 | Tool | Mode | Cost | What it does |
 | --- | --- | --- | --- |
 | `api_status` | read | Free | Check API key tier, credit usage and remaining requests, and historyFrom, how far back events, market and calls read. Also confirms the API is reachable. |
+| `enterprise_docs` | read | Free | Docs for the enterprise endpoints this key can call, which the public docs do not list: a list without an id, one endpoint's full docs with one. |
 | `entities` | read | 1 per call | Resolve a ticker, $cashtag, name, @handle, contract address, CoinGecko id, FIGI or CIK to the entity id that events and calls take. Matches exactly, it is not a search. |
 | `events` | read | 1, plus 1 per event or 2 per storyline or arc | What is happening in crypto and equity markets. level=events for what happened and how prices reacted, level=storylines for one development threaded over days, level=arcs for storylines grouped into a larger movement. Searchable by topic. |
 | `calendar` | read | 1, plus 1 per entry | What is scheduled across crypto, equities and macro: launches, unlocks, votes, listings, earnings, data releases, rate decisions and more, soonest first, with how reliable each date is. |
